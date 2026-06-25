@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -57,6 +57,15 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
       setState(() {
         _classes = (response['data'] as List)
           .map((j) => ClassModel.fromJson(j)).toList();
+        const order = ['Nursery','LKG','UKG','Class 1','Class 2','Class 3','Class 4','Class 5','Class 6','Class 7','Class 8','Class 9','Class 10','Class 11','Class 12'];
+        _classes.sort((a, b) {
+          final ai = order.indexOf(a.className);
+          final bi = order.indexOf(b.className);
+          if (ai == -1 && bi == -1) return a.className.compareTo(b.className);
+          if (ai == -1) return 1;
+          if (bi == -1) return -1;
+          return ai.compareTo(bi);
+        });
         _loading = false;
       });
     } catch (e) {
@@ -152,16 +161,7 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
                             borderRadius: BorderRadius.circular(8)),
                           child: Text(c.stage,
                             style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.bold))),
-                        PopupMenuButton(
-                          itemBuilder: (_) => [
-                            const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                            const PopupMenuItem(value: 'delete',
-                              child: Text('Delete', style: TextStyle(color: Colors.red))),
-                          ],
-                          onSelected: (val) {
-                            if (val == 'delete') _deleteClass(c.id);
-                          },
-                        ),
+
                       ]),
                     ),
                   );
@@ -244,5 +244,7 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
     );
   }
 }
+
+
 
 
