@@ -1,6 +1,12 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -222,19 +228,11 @@ class _ReportsScreenState extends State<ReportsScreen>
       const SizedBox(height: 16),
 
       // Export buttons
-      Row(children: [
-        Expanded(child: OutlinedButton.icon(
-          onPressed: () => _showExportSnack(context),
-          icon: const Icon(Icons.picture_as_pdf),
-          label: const Text('Export PDF'),
-        )),
-        const SizedBox(width: 10),
-        Expanded(child: ElevatedButton.icon(
-          onPressed: () => _showExportSnack(context),
-          icon: const Icon(Icons.table_chart),
-          label: const Text('Export Excel'),
-        )),
-      ]),
+      SizedBox(width: double.infinity, child: OutlinedButton.icon(
+        onPressed: () => _exportPdf(context, 'Attendance Report'),
+        icon: const Icon(Icons.picture_as_pdf),
+        label: const Text('Export PDF'),
+      )),
     ]),
   );
 
@@ -425,11 +423,10 @@ class _ReportsScreenState extends State<ReportsScreen>
                 title: Text(r['title'] as String,
                   style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                 subtitle: Text(r['sub'] as String, style: const TextStyle(fontSize: 11)),
-                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                 IconButton(icon: Icon(Icons.visibility, color: color, size: 20), onPressed: () => context.go('/reports/${Uri.encodeComponent(r['title'] as String)}')),
-                  IconButton(icon: const Icon(Icons.download, color: Colors.grey, size: 20),
-                    onPressed: () => _showExportSnack(context)),
-                ]),
+                trailing: IconButton(
+                  icon: Icon(Icons.visibility, color: color, size: 22),
+                  onPressed: () => context.go("/reports/" + Uri.encodeComponent(r["title"] as String))
+                ),
               ),
             );
           },
@@ -438,10 +435,82 @@ class _ReportsScreenState extends State<ReportsScreen>
     );
   }
 
+  Future<void> _exportPdf(BuildContext context, String title) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Row(children: [
+          SizedBox(width:18,height:18,child: CircularProgressIndicator(color:Colors.white,strokeWidth:2)),
+          SizedBox(width:10), Text('Generating PDF...')]),
+          backgroundColor: Colors.blue, duration: Duration(seconds: 2)));
+
+      final pdf = pw.Document();
+      pdf.addPage(pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context ctx) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Container(
+              padding: const pw.EdgeInsets.all(16),
+              decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFF1565C0)),
+              child: pw.Row(children: [
+                pw.Expanded(child: pw.Text(title,
+                  style: pw.TextStyle(color: PdfColors.white,
+                    fontSize: 18, fontWeight: pw.FontWeight.bold))),
+                pw.Text('Generated: ' + DateTime.now().day.toString() + '/' + DateTime.now().month.toString() + '/' + DateTime.now().year.toString(),
+                  style: const pw.TextStyle(color: PdfColors.white, fontSize: 10)),
+              ])),
+            pw.SizedBox(height: 20),
+            pw.Text('School Management System',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 4),
+            pw.Text('Academic Year: 2025-26',
+              style: const pw.TextStyle(color: PdfColors.grey, fontSize: 11)),
+            pw.SizedBox(height: 20),
+            pw.Divider(),
+            pw.SizedBox(height: 12),
+            pw.Text('Report Summary',
+              style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 10),
+            pw.Table(border: pw.TableBorder.all(color: PdfColors.grey300),
+              children: [
+                pw.TableRow(decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFE3F2FD)),
+                  children: ['Parameter', 'Value'].map((h) => pw.Padding(
+                    padding: const pw.EdgeInsets.all(8),
+                    child: pw.Text(h, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)))).toList()),
+                pw.TableRow(children: ['Total Students', '1,248'].map((v) => pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(v, style: const pw.TextStyle(fontSize: 10)))).toList()),
+                pw.TableRow(children: ['Pass Rate', '94.2%'].map((v) => pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(v, style: const pw.TextStyle(fontSize: 10)))).toList()),
+                pw.TableRow(children: ['Avg Score', '76.4%'].map((v) => pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(v, style: const pw.TextStyle(fontSize: 10)))).toList()),
+                pw.TableRow(children: ['Attendance', '87.3%'].map((v) => pw.Padding(
+                  padding: const pw.EdgeInsets.all(8),
+                  child: pw.Text(v, style: const pw.TextStyle(fontSize: 10)))).toList()),
+              ]),
+            pw.SizedBox(height: 20),
+            pw.Center(child: pw.Text('--- End of Report ---',
+              style: const pw.TextStyle(color: PdfColors.grey, fontSize: 10))),
+          ]),
+      ));
+
+      final pdfBytes = await pdf.save();
+      await Printing.sharePdf(
+        bytes: pdfBytes,
+        filename: title.replaceAll(' ', '_') + '.pdf',
+      );
+    } catch (e) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('PDF Error: ' + e.toString()), backgroundColor: Colors.red));
+    }
+  }
+
   void _showExportSnack(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Report exported! (PDF/Excel export will be available in next update)'),
-        backgroundColor: Colors.green));
+      const SnackBar(content: Text('Use Export PDF or Export Excel buttons'),
+        backgroundColor: Colors.blue));
   }
 
   Widget _kpi(String label, String value, String change, IconData icon, Color color, bool isPositive) =>
@@ -510,5 +579,3 @@ class _ReportsScreenState extends State<ReportsScreen>
     Text(label, style: const TextStyle(fontSize: 11)),
   ]);
 }
-
-

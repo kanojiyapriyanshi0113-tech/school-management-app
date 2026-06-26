@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
@@ -188,10 +188,10 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
     child: Column(children: [
       Card(child: Padding(padding: const EdgeInsets.all(16),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          _feeSum('Total','??Rs \18,000',Colors.blue), _feeSum('Paid','??Rs \14,500',Colors.green), _feeSum('Pending','??Rs \1,500',Colors.red),
+          _feeSum('Total','₹18,000',Colors.blue), _feeSum('Paid','₹14,500',Colors.green), _feeSum('Pending','₹1,500',Colors.red),
         ]))),
       const SizedBox(height: 12),
-      ...[['Tuition Fee','??Rs \12,500','paid','15 Jun'],['Transport Fee','??Rs \1,500','pending','15 Jun'],['Exam Fee','??Rs \1,000','paid','01 Jun']].map((f) =>
+      ...[['Tuition Fee','₹12,500','paid','15 Jun'],['Transport Fee','₹1,500','pending','15 Jun'],['Exam Fee','₹1,000','paid','01 Jun']].map((f) =>
         Card(margin: const EdgeInsets.only(bottom: 8), child: ListTile(
           title: Text(f[0], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
           subtitle: Text('Due: ${f[3]}', style: const TextStyle(fontSize: 11)),

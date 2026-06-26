@@ -1,4 +1,4 @@
-name: school_management_app
+﻿name: school_management_app
 description: School Management Application
 publish_to: 'none'
 version: 1.0.0+1
@@ -31,14 +31,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-
-
-
-
-
-
-
-
-
-

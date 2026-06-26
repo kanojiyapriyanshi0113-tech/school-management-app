@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
@@ -261,18 +261,161 @@ class _CreateFeeScreenState extends State<CreateFeeScreen> {
         'status': 'pending',
       });
       setState(() => _saving = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Fee created successfully!'),
-            backgroundColor: Colors.green));
-        context.go('/fees');
-      }
+      if (mounted) _showSuccessScreen();
     } catch (e) {
       setState(() => _saving = false);
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red));
     }
   }
+
+  void _showSuccessScreen() {
+    final amount = _finalPayable.toStringAsFixed(0);
+    final studentName = _selectedStudent?.name ?? 'Student';
+    final txnId = 'TXN${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black87,
+      transitionDuration: const Duration(milliseconds: 400),
+      transitionBuilder: (ctx, anim, _, child) => ScaleTransition(
+        scale: CurvedAnimation(parent: anim, curve: Curves.elasticOut),
+        child: child),
+      pageBuilder: (ctx, _, __) => Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Container(
+          color: Colors.white,
+          width: double.infinity,
+          height: double.infinity,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Success animation circle
+                  Container(
+                    width: 120, height: 120,
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.green.shade200, width: 3)),
+                    child: const Icon(Icons.check_circle_rounded,
+                      color: Colors.green, size: 80)),
+                  const SizedBox(height: 24),
+                  const Text('Fee Collected!',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold,
+                      color: Colors.green)),
+                  const SizedBox(height: 8),
+                  Text('Payment received successfully',
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
+                  const SizedBox(height: 32),
+
+                  // Receipt card
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200)),
+                    child: Column(children: [
+                      // Transaction ID header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Receipt', style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade100,
+                              borderRadius: BorderRadius.circular(20)),
+                            child: const Text('PAID',
+                              style: TextStyle(color: Colors.green,
+                                fontWeight: FontWeight.bold, fontSize: 12))),
+                        ]),
+                      const Divider(height: 20),
+                      _receiptRow(Icons.person, 'Student', studentName),
+                      const SizedBox(height: 10),
+                      _receiptRow(Icons.category, 'Fee Type', _feeType),
+                      const SizedBox(height: 10),
+                      _receiptRow(Icons.payment, 'Payment Mode', _paymentMode),
+                      const SizedBox(height: 10),
+                      _receiptRow(Icons.calendar_today, 'Due Date', _dueDate.text),
+                      const SizedBox(height: 10),
+                      _receiptRow(Icons.tag, 'Transaction ID', txnId),
+                      const Divider(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Amount Paid',
+                            style: TextStyle(fontWeight: FontWeight.bold,
+                              fontSize: 16)),
+                          Text('₹$amount',
+                            style: const TextStyle(fontWeight: FontWeight.bold,
+                              fontSize: 22, color: Colors.green)),
+                        ]),
+                    ]),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Buttons
+                  Row(children: [
+                    Expanded(child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        // Reset form for new entry
+                        setState(() {
+                          _selectedStudentId = null;
+                          _selectedStudent = null;
+                          _amount.text = _feeStructure[_feeType]!.toStringAsFixed(0);
+                          _dueDate.clear();
+                        });
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('New Fee'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12))))),
+                    const SizedBox(width: 12),
+                    Expanded(child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        context.go('/fees');
+                      },
+                      icon: const Icon(Icons.list_alt),
+                      label: const Text('View Fees'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12))))),
+                  ]),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _receiptRow(IconData icon, String label, String value) =>
+    Row(children: [
+      Icon(icon, size: 16, color: Colors.grey),
+      const SizedBox(width: 8),
+      SizedBox(width: 100, child: Text(label,
+        style: const TextStyle(color: Colors.grey, fontSize: 13))),
+      Expanded(child: Text(value,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        textAlign: TextAlign.end,
+        overflow: TextOverflow.ellipsis)),
+    ]);
 
   Widget _sectionHeader(String title, IconData icon) => Row(children: [
     Container(width: 4, height: 18,
@@ -292,5 +435,3 @@ class _CreateFeeScreenState extends State<CreateFeeScreen> {
         fontWeight: FontWeight.w600, color: color)),
     ]));
 }
-
-

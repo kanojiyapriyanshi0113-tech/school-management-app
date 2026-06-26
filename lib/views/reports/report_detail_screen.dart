@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../core/theme/app_theme.dart';
 
 class ReportDetailScreen extends StatelessWidget {
@@ -16,15 +20,108 @@ class ReportDetailScreen extends StatelessWidget {
           onPressed: () => context.go('/reports'),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.download), onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Downloading report...'), backgroundColor: Colors.green));
-          }),
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'Download PDF',
+            onPressed: () => _downloadPdf(context)),
+          IconButton(
+            icon: const Icon(Icons.share),
+            tooltip: 'Share',
+            onPressed: () => _shareReport(context)),
         ],
       ),
       body: _buildReport(context),
     );
+  }
+
+  Future<void> _downloadPdf(BuildContext context) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(children: [
+            SizedBox(width:18,height:18,
+              child: CircularProgressIndicator(color:Colors.white,strokeWidth:2)),
+            SizedBox(width:10), Text('Generating PDF...')]),
+          backgroundColor: Colors.blue, duration: Duration(seconds: 2)));
+
+      final pdf = pw.Document();
+      pdf.addPage(pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context ctx) => pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Container(
+              width: double.infinity,
+              padding: const pw.EdgeInsets.all(16),
+              decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFF1565C0)),
+              child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
+                pw.Text(reportType,
+                  style: pw.TextStyle(color: PdfColors.white,
+                    fontSize: 20, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 4),
+                pw.Text('School Management System • Academic Year 2025-26',
+                  style: const pw.TextStyle(color: PdfColors.white, fontSize: 11)),
+              ])),
+            pw.SizedBox(height: 24),
+            pw.Text('Report Details',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+            pw.Divider(),
+            pw.SizedBox(height: 12),
+            pw.Table(
+              border: pw.TableBorder.all(color: PdfColors.grey300),
+              children: [
+                _pdfHeaderRow(['Parameter', 'Value', 'Status']),
+                _pdfDataRow(['Total Students', '1,248', 'Active']),
+                _pdfDataRow(['Pass Rate', '94.2%', 'Good']),
+                _pdfDataRow(['Avg Score', '76.4%', 'Average']),
+                _pdfDataRow(['Attendance', '87.3%', 'Good']),
+                _pdfDataRow(['Fee Collected', 'Rs 4.2L', 'On Track']),
+                _pdfDataRow(['Pending Fees', 'Rs 1.1L', 'Action Needed']),
+              ]),
+            pw.SizedBox(height: 24),
+            pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
+              pw.Text('Generated on: ' + DateTime.now().day.toString() + '/' + DateTime.now().month.toString() + '/' + DateTime.now().year.toString(),
+                style: const pw.TextStyle(color: PdfColors.grey, fontSize: 9)),
+              pw.Text('Confidential - School Use Only',
+                style: const pw.TextStyle(color: PdfColors.grey, fontSize: 9)),
+            ]),
+          ]),
+      ));
+
+      await Printing.sharePdf(
+        bytes: await pdf.save(),
+        filename: reportType.replaceAll(' ', '_') + '.pdf',
+      );
+    } catch (e) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ' + e.toString()), backgroundColor: Colors.red));
+    }
+  }
+
+  pw.TableRow _pdfHeaderRow(List<String> cells) => pw.TableRow(
+    decoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFE3F2FD)),
+    children: cells.map((h) => pw.Padding(
+      padding: const pw.EdgeInsets.all(8),
+      child: pw.Text(h, style: pw.TextStyle(
+        fontWeight: pw.FontWeight.bold, fontSize: 10)))).toList());
+
+  pw.TableRow _pdfDataRow(List<String> cells) => pw.TableRow(
+    children: cells.map((v) => pw.Padding(
+      padding: const pw.EdgeInsets.all(8),
+      child: pw.Text(v, style: const pw.TextStyle(fontSize: 10)))).toList());
+
+  Future<void> _shareReport(BuildContext context) async {
+    try {
+      final dateStr = DateTime.now().day.toString() + '/' + DateTime.now().month.toString() + '/' + DateTime.now().year.toString();
+      final shareText = reportType + '\n\nSchool Management System\nAcademic Year: 2025-26\n\nTotal Students: 1,248 | Pass Rate: 94.2% | Avg Score: 76.4%\nAttendance: 87.3% | Fee Collected: Rs 4.2L\n\nGenerated on ' + dateStr;
+      await SharePlus.instance.share(ShareParams(
+        text: shareText,
+        subject: reportType,
+      ));
+    } catch (e) {
+      if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Share failed: ' + e.toString()), backgroundColor: Colors.red));
+    }
   }
 
   Widget _buildReport(BuildContext context) {
@@ -650,5 +747,3 @@ class ReportDetailScreen extends StatelessWidget {
     }
   }
 }
-
-

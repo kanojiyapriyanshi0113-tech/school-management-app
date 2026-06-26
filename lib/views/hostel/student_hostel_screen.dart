@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -226,7 +226,7 @@ class _StudentHostelDetailScreenState
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           _feeStat('Total Paid', '₹${_totalPaid.toStringAsFixed(0)}',    Colors.green),
           _feeStat('Due Amount', '₹${_totalPending.toStringAsFixed(0)}', Colors.red),
-          _feeStat('Monthly Rent', '??Rs \1,000',                               Colors.blue),
+          _feeStat('Monthly Rent', '₹5,000',                               Colors.blue),
         ]),
       )),
       const SizedBox(height: 12),

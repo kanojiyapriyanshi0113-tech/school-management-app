@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -131,14 +131,14 @@ class StaffDetailScreen extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     child: Column(children: [
       _infoCard('June 2025 Salary', [
-        _row('Basic Salary', '??Rs \10,000'),
-        _row('HRA', '??Rs \10,000'),
-        _row('TA', '??Rs \1,000'),
-        _row('Other Allowance', '??Rs \1,000'),
-        _row('Gross Salary', '??Rs \1,10,000'),
-        _row('PF Deduction', '??Rs \1,600'),
-        _row('Tax', '??Rs \1,000'),
-        _row('Net Salary', '??Rs \12,400'),
+        _row('Basic Salary', '₹10,000'),
+        _row('HRA', '₹10,000'),
+        _row('TA', '₹1,000'),
+        _row('Other Allowance', '₹1,000'),
+        _row('Gross Salary', '₹1,10,000'),
+        _row('PF Deduction', '₹1,600'),
+        _row('Tax', '₹1,000'),
+        _row('Net Salary', '₹12,400'),
       ]),
     ]),
   );

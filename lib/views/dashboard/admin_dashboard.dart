@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -42,13 +42,18 @@ class AdminDashboard extends StatelessWidget {
       appBar: AppBar(
         title: const Text('School Management System'),
         actions: [
-          IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () => _showNotifications(context)),
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              backgroundColor: Colors.white24,
-              child: Text(user?.name.substring(0, 1) ?? 'A',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: GestureDetector(
+              onTap: () => _showProfile(context, user),
+              child: CircleAvatar(
+                backgroundColor: Colors.white24,
+                child: Text(user?.name.substring(0, 1) ?? 'A',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
             ),
           ),
         ],
@@ -89,6 +94,114 @@ class AdminDashboard extends StatelessWidget {
       const SizedBox(height: 12),
     ]),
   );
+
+  void _showNotifications(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (_, sc) => Column(children: [
+          Container(margin: const EdgeInsets.only(top: 10),
+            width: 40, height: 4,
+            decoration: BoxDecoration(color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2))),
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(children: [
+              Icon(Icons.notifications, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Notifications', style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold)),
+            ])),
+          const Divider(height: 1),
+          Expanded(child: ListView(controller: sc, children: [
+            _notifTile(Icons.person_add, 'New Admission',
+              'Rahul Kumar admitted to Class 10-A', '10 min ago', Colors.blue),
+            _notifTile(Icons.payment, 'Fee Received',
+              'Fee of Rs 12,500 received from Priya Singh', '25 min ago', Colors.green),
+            _notifTile(Icons.check_circle, 'Attendance Marked',
+              'Attendance marked for Class 9-B', '1 hr ago', Colors.teal),
+            _notifTile(Icons.campaign, 'Notice Posted',
+              'Annual Sports Day on 20 July', '2 hrs ago', Colors.orange),
+            _notifTile(Icons.warning, 'Fee Overdue',
+              '3 students have overdue fees', '3 hrs ago', Colors.red),
+            _notifTile(Icons.event, 'Exam Scheduled',
+              'Mid-term exams scheduled for July 22', '5 hrs ago', Colors.purple),
+            _notifTile(Icons.library_books, 'Library Alert',
+              '5 books overdue for return', '1 day ago', Colors.brown),
+          ])),
+        ]),
+      ),
+    );
+  }
+
+  Widget _notifTile(IconData icon, String title, String sub, String time, Color color) =>
+    ListTile(
+      leading: CircleAvatar(
+        backgroundColor: color.withOpacity(0.1),
+        child: Icon(icon, color: color, size: 20)),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+      subtitle: Text(sub, style: const TextStyle(fontSize: 11)),
+      trailing: Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+    );
+
+  void _showProfile(BuildContext context, dynamic user) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 40, height: 4,
+            decoration: BoxDecoration(color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 20),
+          CircleAvatar(radius: 40,
+            backgroundColor: AppTheme.primaryColor.withOpacity(0.15),
+            child: Text(user?.name?.substring(0,1) ?? 'A',
+              style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor))),
+          const SizedBox(height: 12),
+          Text(user?.name ?? 'Admin',
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(user?.email ?? 'admin@school.com',
+            style: const TextStyle(color: Colors.grey, fontSize: 13)),
+          const SizedBox(height: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(20)),
+            child: const Text('Administrator',
+              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 12))),
+          const SizedBox(height: 20),
+          const Divider(),
+          ListTile(leading: const Icon(Icons.edit, color: Colors.blue),
+            title: const Text('Edit Profile'), trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pop(context)),
+          ListTile(leading: const Icon(Icons.lock_outline, color: Colors.orange),
+            title: const Text('Change Password'), trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pop(context)),
+          ListTile(leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            onTap: () {
+              Navigator.pop(context);
+              context.read<AuthProvider>().logout();
+              context.go('/login');
+            }),
+          const SizedBox(height: 12),
+        ]),
+      ),
+    );
+  }
 
   Widget _drawer(BuildContext context) => Drawer(
     child: Column(children: [
@@ -216,6 +329,3 @@ class AdminDashboard extends StatelessWidget {
     subtitle: Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
   );
 }
-
-
-
