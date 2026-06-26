@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/transport_provider.dart';
@@ -88,7 +88,7 @@ class _StudentTransportScreenState extends State<StudentTransportScreen> {
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(s.studentName,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              Text('Route: ${s.routeId} ? Vehicle: ${s.vehicleId}',
+              Text('Route: ${s.routeId} • Vehicle: ${s.vehicleId}',
                 style: const TextStyle(fontSize: 11, color: Colors.grey)),
             ])),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -568,6 +568,3 @@ class _StudentTransportScreenState extends State<StudentTransportScreen> {
     child: Text(label,
       style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)));
 }
-
-
-

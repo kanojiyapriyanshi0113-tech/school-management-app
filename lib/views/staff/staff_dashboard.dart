@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -178,7 +178,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
               title: Text(leave.staffName,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               subtitle: Text(
-        '${leave.leaveType} ? ${leave.fromDate} (${leave.days} day${leave.days > 1 ? 's' : ''})',
+        '${leave.leaveType} • ${leave.fromDate} (${leave.days} day${leave.days > 1 ? 's' : ''})',
                 style: const TextStyle(fontSize: 11)),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 IconButton(
@@ -266,8 +266,3 @@ class _StaffDashboardState extends State<StaffDashboard> {
       style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
   );
 }
-
-
-
-
-

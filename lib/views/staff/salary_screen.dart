@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/staff_provider.dart';
@@ -68,8 +68,8 @@ class _SalaryScreenState extends State<SalaryScreen>
         color: Colors.white,
         padding: const EdgeInsets.all(16),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          _sumCard('Total Paid', '?${totalPaid.toStringAsFixed(0)}', Colors.green),
-          _sumCard('Pending', '?${totalPending.toStringAsFixed(0)}', Colors.orange),
+          _sumCard('Total Paid', '₹${totalPaid.toStringAsFixed(0)}', Colors.green),
+          _sumCard('Pending', '₹${totalPending.toStringAsFixed(0)}', Colors.orange),
           _sumCard('Staff', '${salaries.length}', Colors.blue),
         ]),
       ),
@@ -105,17 +105,17 @@ class _SalaryScreenState extends State<SalaryScreen>
                 Text(sal.month, style: const TextStyle(color: Colors.grey, fontSize: 12)),
                 const SizedBox(height: 8),
                 Row(children: [
-                  Expanded(child: _salRow('Basic', '?${sal.basicSalary.toStringAsFixed(0)}')),
-                  Expanded(child: _salRow('HRA', '?${sal.hra.toStringAsFixed(0)}')),
-                  Expanded(child: _salRow('TA', '?${sal.ta.toStringAsFixed(0)}')),
+                  Expanded(child: _salRow('Basic', '₹${sal.basicSalary.toStringAsFixed(0)}')),
+                  Expanded(child: _salRow('HRA', '₹${sal.hra.toStringAsFixed(0)}')),
+                  Expanded(child: _salRow('TA', '₹${sal.ta.toStringAsFixed(0)}')),
                 ]),
                 const Divider(),
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text('Gross: ?${sal.grossSalary.toStringAsFixed(0)}',
+                  Text('Gross: "₹${sal.grossSalary.toStringAsFixed(0)}',
                     style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                  Text('Deduction: ?${sal.totalDeduction.toStringAsFixed(0)}',
+                  Text('Deduction: "₹${sal.totalDeduction.toStringAsFixed(0)}',
                     style: const TextStyle(fontSize: 12, color: Colors.red)),
-                  Text('Net: ?${sal.netSalary.toStringAsFixed(0)}',
+                  Text('Net: "₹${sal.netSalary.toStringAsFixed(0)}',
                     style: const TextStyle(
                       fontSize: 13, fontWeight: FontWeight.bold,
                       color: AppTheme.primaryColor)),
@@ -204,4 +204,3 @@ class _SalaryScreenState extends State<SalaryScreen>
     ]),
   );
 }
-

@@ -21,8 +21,8 @@ class HostelFeeScreen extends StatelessWidget {
           color: Colors.white,
           padding: const EdgeInsets.all(16),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _sum('Collected', '?${totalCollected.toStringAsFixed(0)}', Colors.green),
-            _sum('Pending', '?${totalPending.toStringAsFixed(0)}',   Colors.orange),
+            _sum('Collected', '₹${totalCollected.toStringAsFixed(0)}', Colors.green),
+            _sum('Pending', '₹${totalPending.toStringAsFixed(0)}',   Colors.orange),
             _sum('Students', '${students.length}',                     Colors.blue),
           ]),
         ),
@@ -41,11 +41,11 @@ class HostelFeeScreen extends StatelessWidget {
                   child: Text(s.studentName[0],
                     style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold))),
                 title: Text(s.studentName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                subtitle: Text('${s.hostelName} ? Room ${s.roomNumber} ? Bed ${s.bedNumber}',
+                subtitle: Text('${s.hostelName} • Room ${s.roomNumber} • Bed ${s.bedNumber}',
                   style: const TextStyle(fontSize: 11)),
                 trailing: Column(mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  Text('?${s.monthlyFee.toStringAsFixed(0)}',
+                  Text('₹${s.monthlyFee.toStringAsFixed(0)}',
                     style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 14)),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -66,4 +66,3 @@ class HostelFeeScreen extends StatelessWidget {
     Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
   ]);
 }
-

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/exam_provider.dart';
@@ -142,7 +142,7 @@ class _ExamDashboardState extends State<ExamDashboard> {
               Text(exam.name,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               const SizedBox(height: 2),
-              Text('${exam.examType} ? ${exam.className}',
+              Text('${exam.examType} • ${exam.className}',
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ])),
             Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -259,5 +259,3 @@ class _ExamDashboardState extends State<ExamDashboard> {
     Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
   ]);
 }
-
-

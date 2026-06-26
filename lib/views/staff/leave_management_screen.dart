@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/staff_provider.dart';
@@ -113,7 +113,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
                 Row(children: [
                   const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text('${pending[i].fromDate} ? ${pending[i].toDate} (${pending[i].days} day${pending[i].days > 1 ? 's' : ''})',
+                  Text('${pending[i].fromDate} • ${pending[i].toDate} (${pending[i].days} day${pending[i].days > 1 ? 's' : ''})',
                     style: const TextStyle(fontSize: 12)),
                 ]),
                 const SizedBox(height: 6),
@@ -221,7 +221,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
         leading: CircleAvatar(backgroundColor: color.withOpacity(0.1),
           child: Icon(Icons.beach_access, color: color)),
         title: Text(leave.staffName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-        subtitle: Text('${leave.leaveType} ? ${leave.fromDate} (${leave.days} day${leave.days > 1 ? 's' : ''})',
+        subtitle: Text('${leave.leaveType} • ${leave.fromDate} (${leave.days} day${leave.days > 1 ? 's' : ''})',
           style: const TextStyle(fontSize: 11)),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -244,6 +244,3 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
     )),
   );
 }
-
-
-

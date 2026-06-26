@@ -82,7 +82,7 @@ class TransportDashboard extends StatelessWidget {
                 title: Text(v.vehicleNumber,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text(
- '${v.vehicleType} ? ${v.driverName.isEmpty ? "No driver" : v.driverName}'),
+ '${v.vehicleType} • ${v.driverName.isEmpty ? "No driver" : v.driverName}'),
                 trailing: Column(
                   mainAxisAlignment: MainAxisAlignment.center, children: [
                   Container(
@@ -122,7 +122,7 @@ class TransportDashboard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(r.routeName,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text('${r.startPoint} ? ${r.endPoint}',
+                    Text('${r.startPoint} • ${r.endPoint}',
                       style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   ])),
                   Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
@@ -175,5 +175,3 @@ class TransportDashboard extends StatelessWidget {
     }
   }
 }
-
-

@@ -392,7 +392,7 @@ class _StudentTransportViewState extends State<StudentTransportView>
             Text(route.routeName,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 4),
-            Text('${route.startPoint} ? ${route.endPoint}',
+            Text('${route.startPoint} • ${route.endPoint}',
               style: const TextStyle(color: Colors.grey, fontSize: 12)),
             const Divider(height: 16),
             Row(children: [
@@ -997,8 +997,3 @@ class _RoadPainter extends CustomPainter {
   }
   @override bool shouldRepaint(covariant CustomPainter old) => false;
 }
-
-
-
-
-

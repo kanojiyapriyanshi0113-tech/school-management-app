@@ -170,8 +170,8 @@ class _StaffCard extends StatelessWidget {
         ),
         title: Text(staff.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
         subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('${staff.designation} ? ${staff.department}', style: const TextStyle(fontSize: 11)),
-          Text('${staff.employeeId} ? ${staff.phone}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
+          Text('${staff.designation} • ${staff.department}', style: const TextStyle(fontSize: 11)),
+          Text('${staff.employeeId} • ${staff.phone}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
         ]),
         isThreeLine: true,
         trailing: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -200,11 +200,3 @@ class _StaffCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-

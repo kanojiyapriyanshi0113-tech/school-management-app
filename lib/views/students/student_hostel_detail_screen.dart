@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -141,8 +141,8 @@ class _StudentHostelDetailScreenState
           _infoRow('Room Type',    _hostelInfo['roomType'] as String),
           _infoRow('Joining Date', _hostelInfo['joiningDate'] as String),
           _infoRow('Leaving Date', _hostelInfo['leavingDate'] as String),
-          _infoRow('Monthly Rent', '???${(_hostelInfo['monthlyRent'] as double).toStringAsFixed(0)}'),
-          _infoRow('Deposit Paid', '???${(_hostelInfo['deposit'] as double).toStringAsFixed(0)}'),
+          _infoRow('Monthly Rent', '??"₹${(_hostelInfo['monthlyRent'] as double).toStringAsFixed(0)}'),
+          _infoRow('Deposit Paid', '??"₹${(_hostelInfo['deposit'] as double).toStringAsFixed(0)}'),
         ]),
       )),
       const SizedBox(height: 12),
@@ -155,16 +155,16 @@ class _StudentHostelDetailScreenState
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const SizedBox(height: 12),
           Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _feeStat('Paid', '???${_totalPaid.toStringAsFixed(0)}',    Colors.green),
-            _feeStat('Pending', '???${_totalPending.toStringAsFixed(0)}', Colors.red),
-            _feeStat('Deposit', '???${(_hostelInfo['deposit'] as double).toStringAsFixed(0)}', Colors.blue),
+            _feeStat('Paid', '??"₹${_totalPaid.toStringAsFixed(0)}',    Colors.green),
+            _feeStat('Pending', '??"₹${_totalPending.toStringAsFixed(0)}', Colors.red),
+            _feeStat('Deposit', '??"₹${(_hostelInfo['deposit'] as double).toStringAsFixed(0)}', Colors.blue),
           ]),
           if (_totalPending > 0) ...[
             const SizedBox(height: 12),
             SizedBox(width: double.infinity, child: ElevatedButton.icon(
               onPressed: () => _tabController.animateTo(1),
               icon: const Icon(Icons.payment),
-              label: Text('Pay ???${_totalPending.toStringAsFixed(0)} Now'),
+              label: Text('Pay ??"₹${_totalPending.toStringAsFixed(0)} Now'),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             )),
           ],
@@ -224,8 +224,8 @@ class _StudentHostelDetailScreenState
       Card(child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-          _feeStat('Total Paid', '???${_totalPaid.toStringAsFixed(0)}',    Colors.green),
-          _feeStat('Due Amount', '???${_totalPending.toStringAsFixed(0)}', Colors.red),
+          _feeStat('Total Paid', '??"₹${_totalPaid.toStringAsFixed(0)}',    Colors.green),
+          _feeStat('Due Amount', '??"₹${_totalPending.toStringAsFixed(0)}', Colors.red),
           _feeStat('Monthly Rent', '??Rs \1,000',                               Colors.blue),
         ]),
       )),
@@ -269,7 +269,7 @@ class _StudentHostelDetailScreenState
               ]),
               const SizedBox(height: 6),
               Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text('Amount: ???${(p['amount'] as double).toStringAsFixed(0)}',
+                Text('Amount: ??"₹${(p['amount'] as double).toStringAsFixed(0)}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey)),
                 if (p['status'] == 'paid')
                   Text('Paid on: ${p['date']}',
@@ -280,7 +280,7 @@ class _StudentHostelDetailScreenState
                 SizedBox(width: double.infinity, child: ElevatedButton.icon(
                   onPressed: () => _showPaymentDialog(context, p['month'] as String, p['amount'] as double),
                   icon: const Icon(Icons.payment, size: 16),
-                  label: Text('Pay ???${(p['amount'] as double).toStringAsFixed(0)}'),
+                  label: Text('Pay ??"₹${(p['amount'] as double).toStringAsFixed(0)}'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 8)),
@@ -458,7 +458,7 @@ class _StudentHostelDetailScreenState
                 borderRadius: BorderRadius.circular(8)),
               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 const Text('Amount to Pay:', style: TextStyle(fontWeight: FontWeight.w600)),
-                Text('???${amount.toStringAsFixed(0)}',
+                Text('??"₹${amount.toStringAsFixed(0)}',
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
                     color: AppTheme.primaryColor)),
               ]),
@@ -491,7 +491,7 @@ class _StudentHostelDetailScreenState
               onPressed: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('Payment of ???${amount.toStringAsFixed(0)} initiated via $paymentMethod!'),
+                  content: Text('Payment of ??"₹${amount.toStringAsFixed(0)} initiated via $paymentMethod!'),
                   backgroundColor: Colors.green));
                 setState(() {
                   final idx = _paymentHistory.indexWhere((p) => p['month'] == month);
@@ -502,7 +502,7 @@ class _StudentHostelDetailScreenState
                   }
                 });
               },
-              child: Text('Pay ???${amount.toStringAsFixed(0)}'),
+              child: Text('Pay ??"₹${amount.toStringAsFixed(0)}'),
             ),
           ],
         ),
@@ -510,7 +510,7 @@ class _StudentHostelDetailScreenState
     );
   }
 
-  // ?????? Room Change Dialog ??????????????????
+  // ?????• Room Change Dialog ??????????????????
   void _showRoomChangeDialog(BuildContext context) {
     final _reasonCtrl = TextEditingController();
     showDialog(
@@ -725,6 +725,3 @@ class _StudentHostelDetailScreenState
     );
   }
 }
-
-
-

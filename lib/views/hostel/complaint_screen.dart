@@ -1,4 +1,4 @@
-// lib/views/hostel/complaint_screen.dart
+﻿// lib/views/hostel/complaint_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -121,7 +121,7 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
               ],
             ),
             const SizedBox(height: 4),
-            Text('Room ${c.roomNumber} ??? ${c.date}',
+            Text('Room ${c.roomNumber} • ${c.date}',
                 style: const TextStyle(fontSize: 11, color: Colors.grey)),
             const SizedBox(height: 6),
             Text(c.description, style: const TextStyle(fontSize: 12)),
@@ -437,5 +437,3 @@ class _ComplaintScreenState extends State<ComplaintScreen> {
         ]),
       );
 }
-
-

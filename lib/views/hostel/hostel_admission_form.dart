@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/api_service.dart';
@@ -476,7 +476,7 @@ class _HostelAdmissionFormState extends State<HostelAdmissionForm>
               items: _roomList.map((r) => DropdownMenuItem<int>(
                 value: r['id'] as int,
                 child: Text(
-        'Room ${r['room_number']} ? ${r['room_type']} ? ${r['status']}',
+        'Room ${r['room_number']} • ${r['room_type']} • ${r['status']}',
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12)))).toList(),
               onChanged: (v) => setState(() {
@@ -761,4 +761,3 @@ class _HostelAdmissionFormState extends State<HostelAdmissionForm>
       : null,
   );
 }
-

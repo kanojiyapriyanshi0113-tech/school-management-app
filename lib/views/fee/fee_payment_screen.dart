@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -251,7 +251,7 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
           const SizedBox(height: 16),
           const Text('Scan to Pay',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          Text('Rs ${fee.pending.toStringAsFixed(0)} ? ${fee.feeType}',
+          Text('Rs ${fee.pending.toStringAsFixed(0)} • ${fee.feeType}',
             style: const TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 16),
           Container(
@@ -321,5 +321,3 @@ class _FeePaymentScreenState extends State<FeePaymentScreen> {
     }
   }
 }
-
-

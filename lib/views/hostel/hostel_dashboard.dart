@@ -35,7 +35,7 @@ class HostelDashboard extends StatelessWidget {
             _statCard('Boys Hostels', '${p.boysHostels}',    Icons.man,            const Color(0xFF1565C0)),
             _statCard('Girls Hostels', '${p.girlsHostels}',   Icons.woman,          const Color(0xFFE91E63)),
             _statCard('Students', '${p.totalStudents}',  Icons.school,         const Color(0xFF00838F)),
-            _statCard('Pending Fees', '?${p.pendingFees.toStringAsFixed(0)}', Icons.warning, const Color(0xFFC62828)),
+            _statCard('Pending Fees', '₹${p.pendingFees.toStringAsFixed(0)}', Icons.warning, const Color(0xFFC62828)),
           ],
         ),
         const SizedBox(height: 20),
@@ -141,4 +141,3 @@ class HostelDashboard extends StatelessWidget {
     Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
   ]);
 }
-

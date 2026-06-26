@@ -151,7 +151,7 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
                           style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13)))),
                       title: Text('${c.className} - Section ${c.section}',
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                      subtitle: Text('${c.academicYear} ? ${c.stage} Stage',
+                      subtitle: Text('${c.academicYear} • ${c.stage} Stage',
                         style: const TextStyle(fontSize: 11)),
                       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                         Container(
@@ -244,7 +244,3 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
     );
   }
 }
-
-
-
-

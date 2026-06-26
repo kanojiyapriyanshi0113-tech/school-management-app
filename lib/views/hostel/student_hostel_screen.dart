@@ -1,4 +1,4 @@
-// lib/views/hostel/student_hostel_screen.dart
+﻿// lib/views/hostel/student_hostel_screen.dart
 // CHANGES:
 //   1. "Add Complaint" FAB added for students
 //   2. _showAddComplaintDialog() -> real API call via HostelProvider.submitComplaint()
@@ -105,7 +105,7 @@ class StudentHostelScreen extends StatelessWidget {
                                                         FontWeight.bold,
                                                     fontSize: 14)),
                                             Text(
-        '${s.admissionNo} ? ${s.className}-${s.section}',
+        '${s.admissionNo} • ${s.className}-${s.section}',
                                                 style: const TextStyle(
                                                     fontSize: 11,
                                                     color: Colors.grey)),
@@ -329,7 +329,7 @@ class StudentHostelScreen extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13)),
                         Text(
-        'Current: ${s.hostelName} ? Room ${s.roomNumber} ? ${s.bedNumber}',
+        'Current: ${s.hostelName} • Room ${s.roomNumber} • ${s.bedNumber}',
                             style: const TextStyle(
                                 fontSize: 11, color: Colors.grey)),
                       ])),
@@ -392,7 +392,7 @@ class StudentHostelScreen extends StatelessWidget {
                           .map((r) => DropdownMenuItem<int>(
                               value: r['id'] as int,
                               child: Text(
-        'Room ${r['room_number']} ? ${r['room_type']} ? Rs ${r['monthly_rent']}/mo',
+        'Room ${r['room_number']} • ${r['room_type']} ? Rs ${r['monthly_rent']}/mo',
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                       fontSize: 12))))
@@ -484,7 +484,7 @@ class StudentHostelScreen extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 14)),
                   Text(
-        '${s.hostelName} ? Room ${s.roomNumber} ? ${s.bedNumber}',
+        '${s.hostelName} • Room ${s.roomNumber} • ${s.bedNumber}',
                       style: const TextStyle(
                           fontSize: 12, color: Colors.grey)),
                   const SizedBox(height: 4),
@@ -549,4 +549,3 @@ class StudentHostelScreen extends StatelessWidget {
             overflow: TextOverflow.ellipsis),
       ]);
 }
-

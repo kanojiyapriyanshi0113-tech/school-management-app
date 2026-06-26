@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/transport_provider.dart';
 import '../../core/theme/app_theme.dart';
@@ -99,7 +99,7 @@ class _VehicleManagementScreenState extends State<VehicleManagementScreen> {
             Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(v.vehicleNumber,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              Text('${v.vehicleType} ? ${v.seatingCapacity} seats',
+              Text('${v.vehicleType} • ${v.seatingCapacity} seats',
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ])),
             Container(
@@ -260,5 +260,3 @@ class _VehicleManagementScreenState extends State<VehicleManagementScreen> {
       color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
     child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)));
 }
-
-
