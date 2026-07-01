@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
@@ -40,8 +41,12 @@ class AdminDashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('School Management System'),
+        title: Text(context.watch<LanguageProvider>().t('admin_dashboard')),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.language),
+            tooltip: 'Language',
+            onPressed: () => context.go('/settings')),
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
             onPressed: () => _showNotifications(context)),
@@ -218,6 +223,11 @@ class AdminDashboard extends StatelessWidget {
         onTap: () { Navigator.pop(context); context.go(item['route'] as String); },
       )).toList())),
       ListTile(
+        leading: const Icon(Icons.language, color: AppTheme.primaryColor),
+        title: const Text('Language / भाषा / मराठी'),
+        onTap: () { Navigator.pop(context); context.go('/settings'); }),
+      const Divider(),
+      ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),
         title: const Text('Logout', style: TextStyle(color: Colors.red)),
         onTap: () async {
@@ -240,7 +250,7 @@ class AdminDashboard extends StatelessWidget {
         const Text("Here's what's happening today",
           style: TextStyle(color: Colors.grey, fontSize: 13)),
         const SizedBox(height: 20),
-        const Text('Overview', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(context.watch<LanguageProvider>().t('overview'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
@@ -271,7 +281,7 @@ class AdminDashboard extends StatelessWidget {
           },
         ),
         const SizedBox(height: 20),
-        const Text('Quick Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(context.watch<LanguageProvider>().t('quick_actions'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Row(children: [
           _qa(context, Icons.person_add, 'Add Student',  AppTheme.primaryColor, '/students/add'),
@@ -283,7 +293,7 @@ class AdminDashboard extends StatelessWidget {
           _qa(context, Icons.payment, 'Collect Fee',  const Color(0xFFE65100), '/fees/create'),
         ]),
         const SizedBox(height: 20),
-        const Text('Recent Activity', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(context.watch<LanguageProvider>().t('recent_activity'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Card(child: Column(children: [
           _act(Icons.person_add, 'New student Rahul Kumar admitted to Class 10-A', '10 min ago'),

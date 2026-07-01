@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StudentDashboard extends StatelessWidget {
   const StudentDashboard({super.key});
@@ -13,7 +14,7 @@ class StudentDashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Dashboard'),
+        title: Text(context.watch<LanguageProvider>().t('student_dashboard')),
         actions: [
           IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
           Padding(
@@ -67,7 +68,7 @@ class StudentDashboard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Quick Access
-          const Text('Quick Access',
+          Text(context.watch<LanguageProvider>().t('quick_actions'),
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           GridView.count(
@@ -177,6 +178,7 @@ class StudentDashboard extends StatelessWidget {
       _dItem(context, Icons.hotel, 'My Hostel', '/student/hostel'),
       _dItem(context, Icons.badge, 'ID Card', '/student/idcard'),
       _dItem(context, Icons.event_busy, 'Leave', '/student/leave'),
+      _dItem(context, Icons.language, 'Language / भाषा', '/settings'),
       const Divider(),
       ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),

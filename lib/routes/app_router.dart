@@ -30,6 +30,7 @@ import '../views/transport/student_transport_view.dart';
 import '../views/hostel/hostel_screen.dart';
 import '../views/hostel/hostel_admission_form.dart';
 import '../views/reports/reports_screen.dart';
+import '../views/settings/settings_screen.dart';
 import '../views/staff/staff_list_screen.dart';
 import '../views/staff/staff_detail_screen.dart';
 import '../views/staff/add_edit_staff_screen.dart';
@@ -54,6 +55,7 @@ import '../views/teacher/teacher_dashboard.dart';
 import '../views/teacher/teacher_attendance_screen.dart';
 import '../views/teacher/teacher_homework_screen.dart';
 import '../views/teacher/teacher_marks_screen.dart';
+import '../views/settings/settings_screen.dart';
 
 class AppRouter {
   static final _key = GlobalKey<NavigatorState>();
@@ -192,6 +194,7 @@ class AppRouter {
       GoRoute(path: '/hostel',           builder: (c, s) => const HostelScreen()),
       GoRoute(path: '/hostel/admission', builder: (c, s) => const HostelAdmissionForm()),
       GoRoute(path: '/reports',          builder: (c, s) => const ReportsScreen()),
+      GoRoute(path: '/settings',         builder: (c, s) => const SettingsScreen()),
       GoRoute(path: '/reports/:type',
         builder: (c, s) => ReportDetailScreen(
           reportType: Uri.decodeComponent(s.pathParameters['type']!))),
@@ -228,8 +231,3 @@ class AppRouter {
     ],
   );
 }
-
-
-
-
-

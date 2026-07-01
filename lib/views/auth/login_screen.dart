@@ -1,6 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../providers/language_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -139,14 +140,14 @@ class _LoginScreenState extends State<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text('Welcome Back',
+        Text(context.watch<LanguageProvider>().t('welcome_back'),
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
             color: AppTheme.primaryColor)),
         const SizedBox(height: 4),
-        const Text('Sign in to your account',
+        Text(context.watch<LanguageProvider>().t('sign_in_account'),
           style: TextStyle(fontSize: 13, color: Colors.grey)),
         const SizedBox(height: 28),
-        const Text('Login As',
+        Text(context.watch<LanguageProvider>().t('login_as'),
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Consumer<AuthProvider>(
@@ -173,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         const SizedBox(height: 24),
-        const Text('Email Address',
+        Text(context.watch<LanguageProvider>().t('email_address'),
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextField(
@@ -184,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         const SizedBox(height: 20),
-        const Text('Password',
+        Text(context.watch<LanguageProvider>().t('password'),
           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         TextField(
@@ -220,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: loading
               ? const SizedBox(width: 20, height: 20,
                   child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Sign In',
+              : Text(context.watch<LanguageProvider>().t('sign_in'),
                   style: TextStyle(fontWeight: FontWeight.w600)),
           ),
         ),
