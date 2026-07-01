@@ -2,21 +2,90 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../../core/theme/app_theme.dart';
+import '../../providers/fee_provider.dart';
 
-class FeeReceiptScreen extends StatelessWidget {
+class FeeReceiptScreen extends StatefulWidget {
   final int feeId;
   const FeeReceiptScreen({super.key, required this.feeId});
+  @override
+  State<FeeReceiptScreen> createState() => _FeeReceiptScreenState();
+}
+
+class _FeeReceiptScreenState extends State<FeeReceiptScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final p = context.read<FeeProvider>();
+      if (p.fees.isEmpty) p.fetchFees();
+    });
+  }
+
+  FeeModel? _findFee(FeeProvider p) {
+    try {
+      return p.fees.firstWhere((f) => f.id == widget.feeId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _today() {
+    final d = DateTime.now();
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return '${d.day} ${months[d.month-1]} ${d.year}';
+  }
+
+  String _amountInWords(double amount) {
+    // Simple amount-in-words for typical fee ranges
+    final intAmt = amount.toInt();
+    if (intAmt == 0) return 'Zero Rupees Only';
+    final ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    final tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    final teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen',
+      'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+
+    String twoDigits(int n) {
+      if (n == 0) return '';
+      if (n < 10) return ones[n];
+      if (n < 20) return teens[n - 10];
+      return '${tens[n ~/ 10]} ${ones[n % 10]}'.trim();
+    }
+
+    String threeDigits(int n) {
+      if (n >= 100) {
+        final h = n ~/ 100;
+        final rest = n % 100;
+        return '${ones[h]} Hundred${rest > 0 ? ' ${twoDigits(rest)}' : ''}';
+      }
+      return twoDigits(n);
+    }
+
+    if (intAmt < 1000) return '${threeDigits(intAmt)} Rupees Only'.trim();
+    if (intAmt < 100000) {
+      final thousands = intAmt ~/ 1000;
+      final rest = intAmt % 1000;
+      return '${threeDigits(thousands)} Thousand${rest > 0 ? ' ${threeDigits(rest)}' : ''} Rupees Only'.trim();
+    }
+    final lakhs = intAmt ~/ 100000;
+    final rest = intAmt % 100000;
+    final thousands = rest ~/ 1000;
+    final remainder = rest % 1000;
+    return '${threeDigits(lakhs)} Lakh'
+      '${thousands > 0 ? ' ${threeDigits(thousands)} Thousand' : ''}'
+      '${remainder > 0 ? ' ${threeDigits(remainder)}' : ''} Rupees Only'.trim();
+  }
 
   // --- PDF Generator ---
-  Future<Uint8List> _generatePdf() async {
+  Future<Uint8List> _generatePdf(FeeModel fee) async {
     final pdf = pw.Document();
-    final receiptNo = 'REC${feeId.toString().padLeft(4, '0')}';
+    final receiptNo = 'REC${fee.id.toString().padLeft(4, '0')}';
 
     pdf.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
@@ -24,107 +93,80 @@ class FeeReceiptScreen extends StatelessWidget {
         return pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.stretch,
           children: [
-            // Header
             pw.Container(
               color: PdfColor.fromHex('#1565C0'),
               padding: const pw.EdgeInsets.all(20),
               child: pw.Column(
                 children: [
                   pw.Text('SCHOOL MANAGEMENT SYSTEM',
-                      style: pw.TextStyle(
-                          color: PdfColors.white,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 16)),
+                      style: pw.TextStyle(color: PdfColors.white,
+                          fontWeight: pw.FontWeight.bold, fontSize: 16)),
                   pw.SizedBox(height: 4),
                   pw.Text('Fee Receipt',
                       style: const pw.TextStyle(color: PdfColors.white, fontSize: 12)),
                   pw.SizedBox(height: 8),
                   pw.Text('Receipt #$receiptNo',
-                      style: pw.TextStyle(
-                          color: PdfColors.white,
-                          fontWeight: pw.FontWeight.bold,
-                          fontSize: 13)),
+                      style: pw.TextStyle(color: PdfColors.white,
+                          fontWeight: pw.FontWeight.bold, fontSize: 13)),
                 ],
               ),
             ),
-
-            // Payment confirmed
             pw.Container(
-              color: PdfColor.fromHex('#E8F5E9'),
+              color: fee.status == 'paid'
+                ? PdfColor.fromHex('#E8F5E9') : PdfColor.fromHex('#FFF3E0'),
               padding: const pw.EdgeInsets.symmetric(vertical: 10),
               child: pw.Center(
-                child: pw.Text('✓ PAYMENT CONFIRMED',
-                    style: pw.TextStyle(
-                        color: PdfColor.fromHex('#2E7D32'),
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 13)),
+                child: pw.Text(
+                  fee.status == 'paid' ? '✓ PAYMENT CONFIRMED' : '⚠ PAYMENT PENDING',
+                  style: pw.TextStyle(
+                      color: fee.status == 'paid'
+                        ? PdfColor.fromHex('#2E7D32') : PdfColor.fromHex('#E65100'),
+                      fontWeight: pw.FontWeight.bold, fontSize: 13)),
               ),
             ),
-
             pw.SizedBox(height: 16),
-
-            // Details
             pw.Padding(
               padding: const pw.EdgeInsets.symmetric(horizontal: 20),
               child: pw.Column(
                 children: [
                   _pdfRow('Receipt No', receiptNo),
-                  _pdfRow('Date', '19 Jun 2026'),
-                  _pdfRow('Student Name', 'Rahul Kumar'),
-                  _pdfRow('Class', 'Class 10-A'),
-                  _pdfRow('Roll No', 'R001'),
-                  _pdfRow('Father Name', 'Suresh Kumar'),
+                  _pdfRow('Date', _today()),
+                  _pdfRow('Student Name', fee.studentName),
                   pw.Divider(),
-                  _pdfRow('Fee Type', 'Tuition Fee'),
-                  _pdfRow('Period', 'June 2026'),
-                  _pdfRow('Due Date', '30 Jun 2026'),
+                  _pdfRow('Fee Type', fee.feeType),
+                  _pdfRow('Due Date', fee.dueDate.isNotEmpty ? fee.dueDate : 'N/A'),
                   pw.Divider(),
-                  _pdfRow('Fee Amount', 'Rs. 12,500'),
-                  _pdfRow('Discount', 'Rs. 0'),
-                  _pdfRow('Late Fine', 'Rs. 0'),
+                  _pdfRow('Fee Amount', 'Rs. ${fee.amount.toStringAsFixed(0)}'),
                   pw.Divider(),
                   pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
-                      pw.Text('Total Paid',
-                          style: pw.TextStyle(
-                              fontWeight: pw.FontWeight.bold, fontSize: 14)),
-                      pw.Text('Rs. 12,500',
-                          style: pw.TextStyle(
-                              fontWeight: pw.FontWeight.bold,
-                              fontSize: 15,
-                              color: PdfColor.fromHex('#1565C0'))),
+                      pw.Text(fee.status == 'paid' ? 'Total Paid' : 'Amount Due',
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
+                      pw.Text('Rs. ${fee.amount.toStringAsFixed(0)}',
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold,
+                              fontSize: 15, color: PdfColor.fromHex('#1565C0'))),
                     ],
                   ),
-                  pw.SizedBox(height: 12),
-                  _pdfRow('Payment Mode', 'Cash'),
-                  _pdfRow('Received By', 'Admin'),
                   pw.SizedBox(height: 16),
-
-                  // Amount in words box
                   pw.Container(
                     width: double.infinity,
                     padding: const pw.EdgeInsets.all(10),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: PdfColors.grey300),
-                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
-                    ),
+                      borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6))),
                     child: pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('Amount in Words:',
                             style: const pw.TextStyle(color: PdfColors.grey, fontSize: 10)),
                         pw.SizedBox(height: 4),
-                        pw.Text('Twelve Thousand Five Hundred Rupees Only',
-                            style: pw.TextStyle(
-                                fontWeight: pw.FontWeight.bold, fontSize: 11)),
+                        pw.Text(_amountInWords(fee.amount),
+                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
                       ],
                     ),
                   ),
-
                   pw.SizedBox(height: 30),
-
-                  // Signatures
                   pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
                     children: [
@@ -142,13 +184,11 @@ class FeeReceiptScreen extends StatelessWidget {
                       ]),
                     ],
                   ),
-
                   pw.SizedBox(height: 20),
                   pw.Center(
                     child: pw.Text(
                       'This is a computer generated receipt. No signature required.',
-                      style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey),
-                    ),
+                      style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey)),
                   ),
                 ],
               ),
@@ -157,7 +197,6 @@ class FeeReceiptScreen extends StatelessWidget {
         );
       },
     ));
-
     return Uint8List.fromList(await pdf.save());
   }
 
@@ -166,47 +205,38 @@ class FeeReceiptScreen extends StatelessWidget {
         child: pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text(label,
-                style: const pw.TextStyle(color: PdfColors.grey, fontSize: 11)),
-            pw.Text(value,
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
+            pw.Text(label, style: const pw.TextStyle(color: PdfColors.grey, fontSize: 11)),
+            pw.Text(value, style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
           ],
         ),
       );
 
-  // --- Download PDF ---
-  Future<void> _downloadPdf(BuildContext context) async {
+  Future<void> _downloadPdf(BuildContext context, FeeModel fee) async {
     try {
-      final bytes = await _generatePdf();
-      final receiptNo = 'REC' + feeId.toString().padLeft(4, '0');
-      final fileName = 'FeeReceipt_' + receiptNo + '.pdf';
-
-      // Use temp dir + share sheet — works on all Android versions
+      final bytes = await _generatePdf(fee);
+      final receiptNo = 'REC${fee.id.toString().padLeft(4, '0')}';
       final dir = await getTemporaryDirectory();
-      final file = File(dir.path + '/' + fileName);
+      final file = File('${dir.path}/FeeReceipt_$receiptNo.pdf');
       await file.writeAsBytes(bytes, flush: true);
 
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'application/pdf')],
-        subject: 'Fee Receipt - ' + receiptNo,
+        subject: 'Fee Receipt - $receiptNo',
         text: 'Tap Save / Download to keep this PDF.',
       );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Download failed: ' + e.toString()),
-          backgroundColor: Colors.red,
-        ));
+          content: Text('Download failed: $e'), backgroundColor: Colors.red));
       }
     }
   }
 
-    // --- Share PDF ---
-  Future<void> _sharePdf(BuildContext context) async {
+  Future<void> _sharePdf(BuildContext context, FeeModel fee) async {
     try {
-      final bytes = await _generatePdf();
+      final bytes = await _generatePdf(fee);
+      final receiptNo = 'REC${fee.id.toString().padLeft(4, '0')}';
       final dir = await getTemporaryDirectory();
-      final receiptNo = 'REC${feeId.toString().padLeft(4, '0')}';
       final file = File('${dir.path}/FeeReceipt_$receiptNo.pdf');
       await file.writeAsBytes(bytes);
 
@@ -218,84 +248,78 @@ class FeeReceiptScreen extends StatelessWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Share failed: $e'),
-          backgroundColor: Colors.red,
-        ));
+          content: Text('Share failed: $e'), backgroundColor: Colors.red));
       }
     }
   }
 
-  // --- Print PDF ---
-  Future<void> _printPdf(BuildContext context) async {
+  Future<void> _printPdf(BuildContext context, FeeModel fee) async {
     try {
-      final bytes = await _generatePdf();
+      final bytes = await _generatePdf(fee);
       await Printing.layoutPdf(onLayout: (_) async => bytes);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Print failed: $e'),
-          backgroundColor: Colors.red,
-        ));
+          content: Text('Print failed: $e'), backgroundColor: Colors.red));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final receiptNo = 'REC${feeId.toString().padLeft(4, '0')}';
+    final p = context.watch<FeeProvider>();
+    final fee = _findFee(p);
+
+    if (p.isLoading && fee == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (fee == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Fee Receipt'),
+          leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new),
+            onPressed: () => context.go('/fees'))),
+        body: const Center(child: Text('Receipt not found')),
+      );
+    }
+
+    final receiptNo = 'REC${fee.id.toString().padLeft(4, '0')}';
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Fee Receipt'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => context.go('/fees'),
-        ),
+          onPressed: () => context.go('/fees')),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.download),
-            tooltip: 'Download PDF',
-            onPressed: () => _downloadPdf(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
-            tooltip: 'Share',
-            onPressed: () => _sharePdf(context),
-          ),
+          IconButton(icon: const Icon(Icons.download), tooltip: 'Download PDF',
+            onPressed: () => _downloadPdf(context, fee)),
+          IconButton(icon: const Icon(Icons.share), tooltip: 'Share',
+            onPressed: () => _sharePdf(context, fee)),
         ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(children: [
-          // Receipt card
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10)
-              ],
-            ),
+              boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 10)]),
             child: Column(children: [
-              // Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor,
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                ),
+                    topLeft: Radius.circular(16), topRight: Radius.circular(16))),
                 child: Column(children: [
                   const Icon(Icons.school, color: Colors.white, size: 36),
                   const SizedBox(height: 8),
                   const Text('SCHOOL MANAGEMENT SYSTEM',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14)),
+                      style: TextStyle(color: Colors.white,
+                          fontWeight: FontWeight.bold, fontSize: 14)),
                   const Text('Fee Receipt',
                       style: TextStyle(color: Colors.white70, fontSize: 12)),
                   const SizedBox(height: 8),
@@ -303,106 +327,78 @@ class FeeReceiptScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                      borderRadius: BorderRadius.circular(8)),
                     child: Text('Receipt #$receiptNo',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12)),
-                  ),
+                        style: const TextStyle(color: Colors.white,
+                            fontWeight: FontWeight.bold, fontSize: 12))),
                 ]),
               ),
-
-              // Status badge
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                color: Colors.green.withOpacity(0.1),
-                child: const Row(
+                color: fee.status == 'paid'
+                  ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 18),
-                    SizedBox(width: 8),
-                    Text('PAYMENT CONFIRMED',
+                    Icon(fee.status == 'paid' ? Icons.check_circle : Icons.access_time,
+                      color: fee.status == 'paid' ? Colors.green : Colors.orange, size: 18),
+                    const SizedBox(width: 8),
+                    Text(fee.status == 'paid' ? 'PAYMENT CONFIRMED' : 'PAYMENT PENDING',
                         style: TextStyle(
-                            color: Colors.green, fontWeight: FontWeight.bold)),
+                          color: fee.status == 'paid' ? Colors.green : Colors.orange,
+                          fontWeight: FontWeight.bold)),
                   ],
                 ),
               ),
-
-              // Details
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(children: [
                   _row('Receipt No', receiptNo),
-                  _row('Date', '19 Jun 2026'),
-                  _row('Student Name', 'Rahul Kumar'),
-                  _row('Class', 'Class 10-A'),
-                  _row('Roll No', 'R001'),
-                  _row('Father Name', 'Suresh Kumar'),
+                  _row('Date', _today()),
+                  _row('Student Name', fee.studentName),
                   const Divider(height: 24),
-                  _row('Fee Type', 'Tuition Fee'),
-                  _row('Period', 'June 2026'),
-                  _row('Due Date', '30 Jun 2026'),
+                  _row('Fee Type', fee.feeType),
+                  _row('Due Date', fee.dueDate.isNotEmpty ? fee.dueDate : 'N/A'),
                   const Divider(height: 24),
-                  _row('Fee Amount', 'Rs. 12,500'),
-                  _row('Discount', 'Rs. 0'),
-                  _row('Late Fine', 'Rs. 0'),
-                  const Divider(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total Paid',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text('Rs. 12,500',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: AppTheme.primaryColor)),
+                      Text(fee.status == 'paid' ? 'Total Paid' : 'Amount Due',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text('Rs. ${fee.amount.toStringAsFixed(0)}',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                              fontSize: 18, color: AppTheme.primaryColor)),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  _row('Payment Mode', 'Cash'),
-                  _row('Received By', 'Admin'),
                   const SizedBox(height: 20),
-
-                  // Amount in words
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: const Column(
+                      border: Border.all(color: Colors.grey.shade200)),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Amount in Words:',
+                        const Text('Amount in Words:',
                             style: TextStyle(fontSize: 11, color: Colors.grey)),
-                        SizedBox(height: 4),
-                        Text('Twelve Thousand Five Hundred Rupees Only',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 12)),
+                        const SizedBox(height: 4),
+                        Text(_amountInWords(fee.amount),
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
                       ],
                     ),
                   ),
                 ]),
               ),
-
-              // Footer
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
                   borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
+                    bottomLeft: Radius.circular(16), bottomRight: Radius.circular(16))),
                 child: Column(children: [
                   const Text('This is a computer generated receipt.',
                       style: TextStyle(fontSize: 11, color: Colors.grey)),
@@ -430,41 +426,26 @@ class FeeReceiptScreen extends StatelessWidget {
               ),
             ]),
           ),
-
           const SizedBox(height: 16),
-
-          // Action buttons
           Row(children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _printPdf(context),
-                icon: const Icon(Icons.print),
-                label: const Text('Print'),
-              ),
-            ),
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => _printPdf(context, fee),
+              icon: const Icon(Icons.print), label: const Text('Print'))),
             const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () => _sharePdf(context),
-                icon: const Icon(Icons.share),
-                label: const Text('Share'),
-              ),
-            ),
+            Expanded(child: ElevatedButton.icon(
+              onPressed: () => _sharePdf(context, fee),
+              icon: const Icon(Icons.share), label: const Text('Share'))),
           ]),
-
           const SizedBox(height: 8),
-
-          // Download button
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _downloadPdf(context),
+              onPressed: () => _downloadPdf(context, fee),
               icon: const Icon(Icons.download),
               label: const Text('Download PDF'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.green,
-                side: const BorderSide(color: Colors.green),
-              ),
+                side: const BorderSide(color: Colors.green)),
             ),
           ),
         ]),
@@ -478,9 +459,7 @@ class FeeReceiptScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
-            Text(value,
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, fontSize: 13)),
+            Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
           ],
         ),
       );

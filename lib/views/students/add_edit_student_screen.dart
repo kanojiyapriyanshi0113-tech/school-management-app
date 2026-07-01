@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
+import '../../services/api_service.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final bool isEdit;
@@ -36,6 +37,16 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
   final _emergencyContact = TextEditingController();
   final _medicalInfo = TextEditingController();
 
+  // Fee tab fields
+  final _admissionFee = TextEditingController(text: '5000');
+  final _tuitionFee = TextEditingController(text: '12500');
+  final _transportFee = TextEditingController(text: '3500');
+  final _hostelFee = TextEditingController(text: '5000');
+  String _feeFrequency = 'Monthly';
+  String _feePaymentMethod = 'Cash';
+  bool _includeTransportFee = false;
+  bool _includeHostelFee = false;
+
   String _gender = 'Male';
   String _bloodGroup = 'A+';
   String _className = 'Class 10';
@@ -46,7 +57,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     if (widget.isEdit && widget.studentId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -101,11 +112,28 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
     _admissionDate.dispose(); _fatherName.dispose(); _motherName.dispose();
     _parentPhone.dispose(); _parentEmail.dispose(); _parentOccupation.dispose();
     _emergencyContact.dispose(); _medicalInfo.dispose();
+    _admissionFee.dispose(); _tuitionFee.dispose();
+    _transportFee.dispose(); _hostelFee.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    // Extra safety checks for required fields
+    if (_name.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Student name is required!'),
+          backgroundColor: Colors.red));
+      _tabController.animateTo(0); // Personal tab pe le jao
+      return;
+    }
+    if (_admissionNo.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Admission number is required!'),
+          backgroundColor: Colors.red));
+      _tabController.animateTo(1); // Admission tab pe le jao
+      return;
+    }
     setState(() => _saving = true);
 
     final student = StudentModel(
@@ -135,20 +163,78 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
     );
 
     bool ok;
+    int? newStudentId = widget.studentId;
     if (widget.isEdit && widget.studentId != null) {
       ok = await context.read<StudentProvider>().updateStudent(widget.studentId!, student);
     } else {
       ok = await context.read<StudentProvider>().addStudent(student);
+      // Naya student create hone ke baad uska ID list mein latest milega
+      if (ok) {
+        final list = context.read<StudentProvider>().students;
+        final match = list.where((s) => s.admissionNo == _admissionNo.text);
+        if (match.isNotEmpty) newStudentId = match.first.id;
+      }
+    }
+
+    // Fee records create karo (sirf naye student ke liye, agar fee set ki ho)
+    if (ok && !widget.isEdit && newStudentId != null) {
+      try {
+        if (_admissionFee.text.isNotEmpty && double.tryParse(_admissionFee.text) != null) {
+          await apiService.post('/fees', {
+            'student_id': newStudentId,
+            'fee_type': 'Admission Fee',
+            'amount': double.parse(_admissionFee.text),
+            'due_date': _admissionDate.text.isNotEmpty ? _admissionDate.text : '',
+            'payment_mode': _feePaymentMethod,
+            'status': 'pending',
+          });
+        }
+        if (_tuitionFee.text.isNotEmpty && double.tryParse(_tuitionFee.text) != null) {
+          await apiService.post('/fees', {
+            'student_id': newStudentId,
+            'fee_type': 'Tuition Fee',
+            'amount': double.parse(_tuitionFee.text),
+            'due_date': '',
+            'payment_mode': _feePaymentMethod,
+            'status': 'pending',
+          });
+        }
+        if (_includeTransportFee && _transportFee.text.isNotEmpty) {
+          await apiService.post('/fees', {
+            'student_id': newStudentId,
+            'fee_type': 'Transport Fee',
+            'amount': double.parse(_transportFee.text),
+            'due_date': '',
+            'payment_mode': _feePaymentMethod,
+            'status': 'pending',
+          });
+        }
+        if (_includeHostelFee && _hostelFee.text.isNotEmpty) {
+          await apiService.post('/fees', {
+            'student_id': newStudentId,
+            'fee_type': 'Hostel Fee',
+            'amount': double.parse(_hostelFee.text),
+            'due_date': '',
+            'payment_mode': _feePaymentMethod,
+            'status': 'pending',
+          });
+        }
+      } catch (_) {
+        // Fee creation fail ho jaye toh bhi student creation success rahega
+      }
     }
 
     setState(() => _saving = false);
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(ok
-            ? (widget.isEdit ? 'Student updated successfully!' : 'Student added successfully!')
-            : 'Failed. Please try again.'),
-        backgroundColor: ok ? Colors.green : Colors.red,
-      ));
+      if (ok && !widget.isEdit) {
+        _showSuccessScreen(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(ok ? 'Student updated successfully!' : 'Failed. Please try again.'),
+          backgroundColor: ok ? Colors.green : Colors.red,
+        ));
+        if (ok) context.go('/students');
+      }
       if (ok) context.go('/students');
     }
   }
@@ -172,6 +258,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
             Tab(text: 'Personal'),
             Tab(text: 'Admission'),
             Tab(text: 'Parent'),
+            Tab(text: 'Fee'),
             Tab(text: 'Documents'),
           ],
         ),
@@ -184,6 +271,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
             _personalTab(),
             _admissionTab(),
             _parentTab(),
+            _feeTab(),
             _documentsTab(),
           ],
         ),
@@ -420,6 +508,242 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
         _field(_emergencyContact, 'Emergency Contact *', Icons.emergency,
             required: true, type: TextInputType.phone),
       ]));
+
+  void _showSuccessScreen(BuildContext context) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black87,
+      transitionDuration: const Duration(milliseconds: 400),
+      transitionBuilder: (ctx, anim, _, child) => ScaleTransition(
+        scale: CurvedAnimation(parent: anim, curve: Curves.elasticOut),
+        child: child),
+      pageBuilder: (ctx, _, __) => Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 120, height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.green.shade200, width: 3)),
+                  child: const Icon(Icons.check_circle_rounded,
+                    color: Colors.green, size: 80)),
+                const SizedBox(height: 24),
+                const Text('Student Added!',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold,
+                    color: Colors.green)),
+                const SizedBox(height: 8),
+                Text('${_name.text} has been successfully enrolled.',
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center),
+                const SizedBox(height: 32),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200)),
+                  child: Column(children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                      const Text('Student Details',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(20)),
+                        child: const Text('ENROLLED',
+                          style: TextStyle(color: Colors.green,
+                            fontWeight: FontWeight.bold, fontSize: 11))),
+                    ]),
+                    const Divider(height: 20),
+                    _successRow(Icons.person, 'Name', _name.text),
+                    const SizedBox(height: 8),
+                    _successRow(Icons.class_, 'Class',
+                      '$_className-$_section'),
+                    const SizedBox(height: 8),
+                    _successRow(Icons.numbers, 'Admission No',
+                      _admissionNo.text),
+                    const SizedBox(height: 8),
+                    _successRow(Icons.receipt, 'Initial Fee',
+                      'Rs ${_calculateTotalFee().toStringAsFixed(0)}'),
+                    const SizedBox(height: 8),
+                    _successRow(Icons.payment, 'Payment Method',
+                      _feePaymentMethod),
+                  ]),
+                ),
+                const SizedBox(height: 32),
+                Row(children: [
+                  Expanded(child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      // Reset form
+                      _name.clear(); _admissionNo.clear();
+                      _tabController.animateTo(0);
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Another'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12))))),
+                  const SizedBox(width: 12),
+                  Expanded(child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      context.go('/students');
+                    },
+                    icon: const Icon(Icons.people),
+                    label: const Text('View Students'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12))))),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _successRow(IconData icon, String label, String value) =>
+    Row(children: [
+      Icon(icon, size: 16, color: Colors.grey),
+      const SizedBox(width: 8),
+      SizedBox(width: 110, child: Text(label,
+        style: const TextStyle(color: Colors.grey, fontSize: 13))),
+      Expanded(child: Text(value,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        overflow: TextOverflow.ellipsis)),
+    ]);
+
+  Widget _feeTab() => SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10)),
+          child: Row(children: [
+            const Icon(Icons.info_outline, color: AppTheme.primaryColor, size: 18),
+            const SizedBox(width: 8),
+            Expanded(child: Text(
+              'Set initial fee structure — fee records will be created automatically when student is added.',
+              style: TextStyle(fontSize: 12, color: AppTheme.primaryColor.withOpacity(0.9)))),
+          ]),
+        ),
+        const SizedBox(height: 18),
+        const Text('Mandatory Fees', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        const SizedBox(height: 10),
+        _field(_admissionFee, 'Admission Fee (Rs.)', Icons.school,
+          type: TextInputType.number),
+        const SizedBox(height: 14),
+        _field(_tuitionFee, 'Tuition Fee (Rs.)', Icons.menu_book,
+          type: TextInputType.number),
+        const SizedBox(height: 14),
+        DropdownButtonFormField<String>(
+          value: _feeFrequency,
+          decoration: InputDecoration(
+            labelText: 'Fee Frequency',
+            prefixIcon: const Icon(Icons.repeat),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+          items: ['Monthly', 'Quarterly', 'Half-Yearly', 'Annual']
+            .map((f) => DropdownMenuItem(value: f, child: Text(f))).toList(),
+          onChanged: (v) => setState(() => _feeFrequency = v!),
+        ),
+        const SizedBox(height: 14),
+        DropdownButtonFormField<String>(
+          value: _feePaymentMethod,
+          decoration: InputDecoration(
+            labelText: 'Payment Method',
+            prefixIcon: const Icon(Icons.payment),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),
+          items: [
+            const DropdownMenuItem(value: 'Cash',
+              child: Row(children: [Icon(Icons.money, size: 18, color: Colors.green),
+                SizedBox(width: 8), Text('Cash')])),
+            const DropdownMenuItem(value: 'UPI',
+              child: Row(children: [Icon(Icons.qr_code, size: 18, color: Colors.blue),
+                SizedBox(width: 8), Text('UPI')])),
+            const DropdownMenuItem(value: 'Online Transfer',
+              child: Row(children: [Icon(Icons.account_balance, size: 18, color: Colors.purple),
+                SizedBox(width: 8), Text('Online Transfer')])),
+            const DropdownMenuItem(value: 'Cheque',
+              child: Row(children: [Icon(Icons.receipt, size: 18, color: Colors.orange),
+                SizedBox(width: 8), Text('Cheque')])),
+          ],
+          onChanged: (v) => setState(() => _feePaymentMethod = v!),
+        ),
+        const SizedBox(height: 22),
+        const Text('Optional Fees', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        const SizedBox(height: 10),
+        Card(
+          child: Column(children: [
+            SwitchListTile(
+              value: _includeTransportFee,
+              onChanged: (v) => setState(() => _includeTransportFee = v),
+              title: const Text('Transport Fee', style: TextStyle(fontSize: 13)),
+              subtitle: _includeTransportFee
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: _field(_transportFee, 'Amount (Rs.)', Icons.directions_bus,
+                      type: TextInputType.number))
+                : null,
+              secondary: const Icon(Icons.directions_bus, color: Colors.blue),
+            ),
+            const Divider(height: 1),
+            SwitchListTile(
+              value: _includeHostelFee,
+              onChanged: (v) => setState(() => _includeHostelFee = v),
+              title: const Text('Hostel Fee', style: TextStyle(fontSize: 13)),
+              subtitle: _includeHostelFee
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: _field(_hostelFee, 'Amount (Rs.)', Icons.bed,
+                      type: TextInputType.number))
+                : null,
+              secondary: const Icon(Icons.bed, color: Colors.purple),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.green.withOpacity(0.2))),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Total Initial Fee', style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green)),
+            const SizedBox(height: 6),
+            Text('Rs ${_calculateTotalFee().toStringAsFixed(0)}',
+              style: const TextStyle(fontWeight: FontWeight.bold,
+                fontSize: 22, color: Colors.green)),
+          ]),
+        ),
+      ]));
+
+  double _calculateTotalFee() {
+    double total = (double.tryParse(_admissionFee.text) ?? 0) +
+                    (double.tryParse(_tuitionFee.text) ?? 0);
+    if (_includeTransportFee) total += double.tryParse(_transportFee.text) ?? 0;
+    if (_includeHostelFee) total += double.tryParse(_hostelFee.text) ?? 0;
+    return total;
+  }
 
   Widget _documentsTab() => SingleChildScrollView(
       padding: const EdgeInsets.all(20),

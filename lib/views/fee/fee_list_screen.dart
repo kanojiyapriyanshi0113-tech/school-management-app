@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -162,6 +162,16 @@ class _FeeListScreenState extends State<FeeListScreen> {
             )),
           ]),
 
+          // Admin: paid fees ki receipt history
+          if (isAdmin && fee.status == 'paid') Row(children: [
+            Expanded(child: OutlinedButton.icon(
+              onPressed: () => context.go('/fees/receipt/${fee.id}'),
+              icon: const Icon(Icons.receipt_long, size: 16),
+              label: const Text('View Receipt', style: TextStyle(fontSize: 12)),
+              style: OutlinedButton.styleFrom(foregroundColor: Colors.green),
+            )),
+          ]),
+
           // Student buttons ? QR Pay
           if (!isAdmin) ...[
             if (fee.status != 'paid') ...[
@@ -302,7 +312,3 @@ class _FeeListScreenState extends State<FeeListScreen> {
     Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
   ]);
 }
-
-
-
-

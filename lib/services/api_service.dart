@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.19:8080/api/v1';
+  static const String baseUrl = 'https://school-management-backend-6k06.onrender.com/api/v1';
   static const String _tokenKey = 'jwt_token';
 
   Future<Map<String, String>> _headers({bool auth = true}) async {
@@ -61,10 +61,3 @@ class ApiService {
 }
 
 final apiService = ApiService();
-
-
-
-
-
-
-

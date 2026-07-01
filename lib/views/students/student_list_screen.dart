@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -219,7 +219,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
                               radius: 22,
                               backgroundColor:
                                   AppTheme.primaryColor.withOpacity(0.1),
-                              child: Text(s.name[0],
+                              child: Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
                                   style: const TextStyle(
                                       color: AppTheme.primaryColor,
                                       fontWeight: FontWeight.bold,
@@ -312,4 +312,3 @@ class _StudentListScreenState extends State<StudentListScreen> {
                 color: color)),
       ]);
 }
-

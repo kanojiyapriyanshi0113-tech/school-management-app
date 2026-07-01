@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed. Please check your credentials.'),
+        SnackBar(content: Text(auth.errorMessage ?? 'Login failed. Please check your credentials.'),
           backgroundColor: Colors.red));
     }
   }
@@ -228,4 +228,3 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
   );
 }
-
