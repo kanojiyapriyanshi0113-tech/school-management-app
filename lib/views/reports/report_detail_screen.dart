@@ -4,11 +4,41 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/student_provider.dart';
+import '../../providers/fee_provider.dart';
 
-class ReportDetailScreen extends StatelessWidget {
+class ReportDetailScreen extends StatefulWidget {
   final String reportType;
   const ReportDetailScreen({super.key, required this.reportType});
+  @override
+  State<ReportDetailScreen> createState() => _ReportDetailScreenState();
+}
+
+class _ReportDetailScreenState extends State<ReportDetailScreen> {
+  // For Student Progress Report
+  String? _selectedClass;
+  StudentModel? _selectedStudent;
+
+  // For Attendance Report
+  String? _attSelectedClass;
+  String? _attSelectedStudent;
+
+  // For Fee Report
+  String? _feeSelectedClass;
+  String? _feeSelectedStudent;
+
+  String get reportType => widget.reportType;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<StudentProvider>().fetchStudents();
+      context.read<FeeProvider>().fetchFees();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,204 +172,520 @@ class ReportDetailScreen extends StatelessWidget {
     }
   }
 
-  // ?? Student Progress ????????
-  Widget _studentProgress() => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _header('Student Progress Report', 'June 2025', Icons.person, Colors.blue),
-      const SizedBox(height: 16),
-      Row(children: [
-        _sumCard('Total Students', '1,248', Colors.blue),
-        const SizedBox(width: 10),
-        _sumCard('Pass Rate', '94.2%', Colors.green),
-        const SizedBox(width: 10),
-        _sumCard('Avg Score', '76.4%', Colors.orange),
-      ]),
-      const SizedBox(height: 16),
-      _sectionTitle('Top Performers'),
-      ...[
-        ['1', 'Priya Singh', 'Class 10-A', '97.4%', 'A+'],
-        ['2', 'Sneha Patel', 'Class 10-B', '95.0%', 'A+'],
-        ['3', 'Rahul Kumar', 'Class 10-A', '92.8%', 'A+'],
-        ['4', 'Anita Gupta', 'Class 9-A', '91.5%', 'A+'],
-        ['5', 'Vijay Verma', 'Class 9-B', '89.3%', 'A'],
-      ].map((s) => Card(
-        margin: const EdgeInsets.only(bottom: 6),
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundColor: _rankColor(s[0] as String).withOpacity(0.15),
-            child: Text(s[0] as String,
-              style: TextStyle(color: _rankColor(s[0] as String), fontWeight: FontWeight.bold))),
-          title: Text(s[1] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-          subtitle: Text(s[2] as String, style: const TextStyle(fontSize: 11)),
-          trailing: Column(mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(s[3] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 13)),
-            Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-              child: Text(s[4] as String, style: const TextStyle(fontSize: 10, color: Colors.green, fontWeight: FontWeight.bold))),
-          ]),
-        ),
-      )),
-      const SizedBox(height: 16),
-      _sectionTitle('Needs Attention'),
-      ...[
-        ['Ravi Kumar', 'Class 8-B', '45.0%', 'F'],
-        ['Mohan Singh', 'Class 7-A', '48.5%', 'F'],
-        ['Asha Patel', 'Class 9-B', '52.0%', 'C'],
-      ].map((s) => Card(
-        color: Colors.red.shade50,
-        margin: const EdgeInsets.only(bottom: 6),
-        child: ListTile(
-          leading: CircleAvatar(backgroundColor: Colors.red.withOpacity(0.1),
-            child: Icon(Icons.warning, color: Colors.red, size: 18)),
-          title: Text(s[0] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-          subtitle: Text(s[1] as String, style: const TextStyle(fontSize: 11)),
-          trailing: Text(s[2] as String,
-            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 13)),
-        ),
-      )),
-    ]),
-  );
+  // Student Progress Report - Class + Student selector
+  Widget _studentProgress() {
+    final sp = context.watch<StudentProvider>();
+    final students = sp.students;
+    
+    // Get unique classes
+    final classes = students.map((s) => '${s.className}-${s.section}').toSet().toList()..sort();
+    
+    // Filter students by selected class
+    final classStudents = _selectedClass == null ? students
+      : students.where((s) => '${s.className}-${s.section}' == _selectedClass).toList();
 
-  // ?? Attendance Report ???????
-  Widget _attendanceReport() => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _header('Attendance Report', 'June 2025', Icons.calendar_today, Colors.green),
-      const SizedBox(height: 16),
-      Row(children: [
-        _sumCard('Avg Attendance', '87.3%', Colors.green),
-        const SizedBox(width: 10),
-        _sumCard('Total Present', '1,088', Colors.blue),
-        const SizedBox(width: 10),
-        _sumCard('Total Absent', '160', Colors.red),
-      ]),
-      const SizedBox(height: 16),
-      _sectionTitle('Class-wise Summary'),
-      Card(child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          headingRowColor: WidgetStateProperty.all(Colors.green.withOpacity(0.08)),
-          columns: const [
-            DataColumn(label: Text('Class',   style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Present', style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Absent',  style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('Late',    style: TextStyle(fontWeight: FontWeight.bold))),
-            DataColumn(label: Text('%',       style: TextStyle(fontWeight: FontWeight.bold))),
-          ],
-          rows: [
-            ['Class 9-A', '142', '8', '3', '95%'],
-            ['Class 10-A', '138', '10', '5', '92%'],
-            ['Class 10-B', '135', '12', '4', '89%'],
-            ['Class 9-B', '128', '18', '6', '85%'],
-            ['Class 8-A', '118', '22', '8', '78%'],
-            ['Class 8-B', '108', '30', '10','72%'],
-          ].map((r) => DataRow(cells: r.map((c) => DataCell(Text(c,
-            style: TextStyle(fontSize: 12,
-              color: c.endsWith('%') ? (int.parse(c.replaceAll('%','')) >= 85 ? Colors.green : Colors.red) : null,
-              fontWeight: c.endsWith('%') ? FontWeight.bold : FontWeight.normal)))).toList())).toList(),
-        ),
-      )),
-      const SizedBox(height: 16),
-      _sectionTitle('Daily Trend - June 2025'),
-      Card(child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(children: [
-          ...[
-            ['Week 1 (1-7 Jun)', '89%', 0.89],
-            ['Week 2 (8-14 Jun)', '85%', 0.85],
-            ['Week 3 (15-21 Jun)', '88%', 0.88],
-            ['Week 4 (22-28 Jun)', '87%', 0.87],
-          ].map((w) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(children: [
-              SizedBox(width: 140, child: Text(w[0] as String, style: const TextStyle(fontSize: 12))),
-              Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(value: w[2] as double, color: Colors.green,
-                  backgroundColor: Colors.green.withOpacity(0.1), minHeight: 12))),
-              const SizedBox(width: 8),
-              Text(w[1] as String, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 12)),
-            ]),
-          )),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _header('Student Progress Report', 'June 2025', Icons.person, Colors.blue),
+        const SizedBox(height: 16),
+        Row(children: [
+          _sumCard('Total Students', students.length.toString(), Colors.blue),
+          const SizedBox(width: 10),
+          _sumCard('Pass Rate', '94.2%', Colors.green),
+          const SizedBox(width: 10),
+          _sumCard('Avg Score', '76.4%', Colors.orange),
         ]),
-      )),
-    ]),
-  );
+        const SizedBox(height: 16),
 
-  // ?? Fee Report ????????
-  Widget _feeReport() => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      _header('Fee Collection Report', 'June 2025', Icons.payments, const Color(0xFFE65100)),
-      const SizedBox(height: 16),
-      Row(children: [
-        _sumCard('Collected', 'Rs 4.2L', Colors.green),
-        const SizedBox(width: 10),
-        _sumCard('Pending', 'Rs 1.1L', Colors.orange),
-        const SizedBox(width: 10),
-        _sumCard('Overdue', 'Rs 0.3L', Colors.red),
-      ]),
-      const SizedBox(height: 16),
-      _sectionTitle('Fee Type Breakdown'),
-      ...[
-        ['Tuition Fee', 'Rs 2,80,000', 'Rs 45,000',  0.86, Colors.blue],
-        ['Hostel Fee', 'Rs 96,000', 'Rs 24,000',   0.80, Colors.purple],
-        ['Transport Fee', 'Rs 28,000', 'Rs 8,000',    0.78, Colors.orange],
-        ['Library Fee', 'Rs 8,500', 'Rs 1,500',    0.85, Colors.green],
-        ['Lab Fee', 'Rs 7,500', 'Rs 2,500',    0.75, Colors.teal],
-      ].map((f) => Card(
-        margin: const EdgeInsets.only(bottom: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text(f[0] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-              Text('Collected: ${f[1]}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 12)),
-            ]),
-            const SizedBox(height: 6),
-            ClipRRect(borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(value: f[3] as double, color: f[4] as Color,
-                backgroundColor: (f[4] as Color).withOpacity(0.1), minHeight: 10)),
-            const SizedBox(height: 4),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('${((f[3] as double) * 100).toStringAsFixed(0)}% collected',
-                style: TextStyle(fontSize: 11, color: f[4] as Color)),
-              Text('Pending: ${f[2]}', style: const TextStyle(fontSize: 11, color: Colors.orange)),
-            ]),
-          ]),
-        ),
-      )),
-      const SizedBox(height: 16),
-      _sectionTitle('Recent Transactions'),
-      ...[
-        ['Priya Singh', 'Tuition Fee', 'Rs 12,500', '15 Jun 2025', 'paid'],
-        ['Rahul Kumar', 'Hostel Fee', 'Rs 8,000', '10 Jun 2025', 'pending'],
-        ['Vijay Verma', 'Transport Fee', 'Rs 3,500', '01 Jun 2025', 'overdue'],
-        ['Anita Gupta', 'Tuition Fee', 'Rs 12,500', '14 Jun 2025', 'paid'],
-      ].map((t) {
-        final color = t[4] == 'paid' ? Colors.green : t[4] == 'pending' ? Colors.orange : Colors.red;
-        return Card(
-          margin: const EdgeInsets.only(bottom: 6),
-          child: ListTile(
-            leading: CircleAvatar(backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-              child: Text((t[0] as String)[0],
-                style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold))),
-            title: Text(t[0] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-            subtitle: Text('${t[1]} - ${t[3]}', style: const TextStyle(fontSize: 11)),
-            trailing: Column(mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Text(t[2] as String, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
-              Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
-                child: Text((t[4] as String).toUpperCase(),
-                  style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.bold))),
+        // Class selector
+        _sectionTitle('Select Class'),
+        const SizedBox(height: 8),
+        SizedBox(height: 38,
+          child: ListView(scrollDirection: Axis.horizontal, children: [
+            GestureDetector(
+              onTap: () => setState(() { _selectedClass = null; _selectedStudent = null; }),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _selectedClass == null ? AppTheme.primaryColor : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20)),
+                child: Text('All Classes',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: _selectedClass == null ? Colors.white : Colors.grey.shade700)),
+              ),
+            ),
+            ...classes.map((cls) => GestureDetector(
+              onTap: () => setState(() { _selectedClass = cls; _selectedStudent = null; }),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _selectedClass == cls ? AppTheme.primaryColor : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20)),
+                child: Text(cls,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: _selectedClass == cls ? Colors.white : Colors.grey.shade700)),
+              ),
+            )),
+          ])),
+        const SizedBox(height: 16),
+
+        // Student detail view
+        if (_selectedStudent != null) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2))),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                CircleAvatar(
+                  backgroundColor: AppTheme.primaryColor.withOpacity(0.15),
+                  child: Text(_selectedStudent!.name.isNotEmpty ? _selectedStudent!.name[0] : '?',
+                    style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold))),
+                const SizedBox(width: 12),
+                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(_selectedStudent!.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text('${_selectedStudent!.className}-${_selectedStudent!.section} | Roll: ${_selectedStudent!.rollNo}',
+                    style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                ])),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 18),
+                  onPressed: () => setState(() => _selectedStudent = null)),
+              ]),
+              const Divider(height: 16),
+              Row(children: [
+                Expanded(child: _miniStat('Score', '83.6%', Colors.green)),
+                Expanded(child: _miniStat('Grade', 'A', Colors.blue)),
+                Expanded(child: _miniStat('Rank', '#3', Colors.orange)),
+                Expanded(child: _miniStat('Attendance', '89%', Colors.teal)),
+              ]),
+              const SizedBox(height: 12),
+              const Text('Subject Performance',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              const SizedBox(height: 8),
+              ...[['Mathematics','92','100'],['Science','85','100'],
+                  ['English','78','100'],['Hindi','88','100'],['Social Science','75','100']].map((sub) =>
+                Padding(padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(children: [
+                    SizedBox(width: 120, child: Text(sub[0], style: const TextStyle(fontSize: 12))),
+                    Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: int.parse(sub[1]) / int.parse(sub[2]),
+                        color: Colors.green, backgroundColor: Colors.green.withOpacity(0.1),
+                        minHeight: 8))),
+                    const SizedBox(width: 8),
+                    Text('${sub[1]}/${sub[2]}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                  ]))),
+              const SizedBox(height: 8),
+              SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                onPressed: () => context.go('/students/${_selectedStudent!.id}'),
+                icon: const Icon(Icons.person, size: 16),
+                label: const Text('View Full Profile'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white),
+              )),
             ]),
           ),
-        );
-      }),
-    ]),
-  );
+          const SizedBox(height: 16),
+        ],
+
+        // Students list
+        _sectionTitle(
+          _selectedClass != null ? 'Students in $_selectedClass' : 'All Students'),
+        const SizedBox(height: 8),
+        if (sp.isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (classStudents.isEmpty)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Text('No students found', style: TextStyle(color: Colors.grey))))
+        else
+          ...classStudents.map((s) {
+            final isSelected = _selectedStudent?.id == s.id;
+            return Card(
+              margin: const EdgeInsets.only(bottom: 6),
+              color: isSelected ? AppTheme.primaryColor.withOpacity(0.05) : null,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                  width: isSelected ? 2 : 0)),
+              child: ListTile(
+                onTap: () => setState(() =>
+                  _selectedStudent = isSelected ? null : s),
+                leading: CircleAvatar(
+                  backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                  child: Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
+                    style: const TextStyle(color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold))),
+                title: Text(s.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                subtitle: Text(
+                  '${s.className}-${s.section} | Roll: ${s.rollNo} | Adm: ${s.admissionNo}',
+                  style: const TextStyle(fontSize: 11)),
+                trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8)),
+                    child: const Text('83.6% A',
+                      style: TextStyle(fontSize: 11, color: Colors.green,
+                        fontWeight: FontWeight.bold))),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
+                ]),
+              ),
+            );
+          }),
+      ]),
+    );
+  }
+
+
+  // Attendance Report - Class + Student selector
+  Widget _attendanceReport() {
+    final sp = context.watch<StudentProvider>();
+    final students = sp.students;
+    final classes = students.map((s) => '${s.className}-${s.section}').toSet().toList()..sort();
+    final classStudents = _attSelectedClass == null ? students
+      : students.where((s) => '${s.className}-${s.section}' == _attSelectedClass).toList();
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _header('Attendance Report', 'June 2025', Icons.calendar_today, Colors.green),
+        const SizedBox(height: 16),
+        Row(children: [
+          _sumCard('Avg', '87.3%', Colors.green),
+          const SizedBox(width: 10),
+          _sumCard('Present', '1,088', Colors.blue),
+          const SizedBox(width: 10),
+          _sumCard('Absent', '160', Colors.red),
+        ]),
+        const SizedBox(height: 16),
+
+        // Class selector
+        _sectionTitle('Select Class'),
+        const SizedBox(height: 8),
+        SizedBox(height: 38,
+          child: ListView(scrollDirection: Axis.horizontal, children: [
+            GestureDetector(
+              onTap: () => setState(() { _attSelectedClass = null; _attSelectedStudent = null; }),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _attSelectedClass == null ? Colors.green : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20)),
+                child: Text('All Classes',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: _attSelectedClass == null ? Colors.white : Colors.grey.shade700)),
+              ),
+            ),
+            ...classes.map((cls) => GestureDetector(
+              onTap: () => setState(() { _attSelectedClass = cls; _attSelectedStudent = null; }),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _attSelectedClass == cls ? Colors.green : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20)),
+                child: Text(cls,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: _attSelectedClass == cls ? Colors.white : Colors.grey.shade700)),
+              ),
+            )),
+          ])),
+        const SizedBox(height: 16),
+
+        // Class summary card
+        _sectionTitle('Class-wise Summary'),
+        Card(child: Padding(padding: const EdgeInsets.all(12), child: Column(
+          children: [
+            ...([
+              ['Class 9-A',  '142','8', '3', '95%', 0.95],
+              ['Class 10-A', '138','10','5', '92%', 0.92],
+              ['Class 10-B', '135','12','4', '89%', 0.89],
+              ['Class 9-B',  '128','18','6', '85%', 0.85],
+              ['Class 8-A',  '118','22','8', '78%', 0.78],
+              ['Class 8-B',  '108','30','10','72%', 0.72],
+            ].where((r) => _attSelectedClass == null || r[0] == _attSelectedClass).map((r) {
+              final pct = int.parse((r[4] as String).replaceAll('%',''));
+              final color = pct >= 90 ? Colors.green : pct >= 80 ? Colors.orange : Colors.red;
+              return Padding(padding: const EdgeInsets.only(bottom: 10),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(r[0] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                    Text(r[4] as String, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 12)),
+                  ]),
+                  const SizedBox(height: 4),
+                  ClipRRect(borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(value: r[5] as double, color: color,
+                      backgroundColor: color.withOpacity(0.1), minHeight: 8)),
+                  const SizedBox(height: 3),
+                  Text('Present: ${r[1]} | Absent: ${r[2]} | Late: ${r[3]}',
+                    style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                ]));
+            })).toList(),
+          ]))),
+        const SizedBox(height: 16),
+
+        // Student-wise attendance
+        _sectionTitle(_attSelectedClass != null
+          ? 'Student Attendance - $_attSelectedClass'
+          : 'All Students Attendance'),
+        const SizedBox(height: 8),
+        if (classStudents.isEmpty)
+          const Center(child: Padding(padding: EdgeInsets.all(16),
+            child: Text('No students found', style: TextStyle(color: Colors.grey))))
+        else
+          ...classStudents.map((s) {
+            final attPct = 87; // real data se aayega
+            final color = attPct >= 90 ? Colors.green : attPct >= 80 ? Colors.orange : Colors.red;
+            return Card(
+              margin: const EdgeInsets.only(bottom: 6),
+              child: Padding(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Column(children: [
+                  Row(children: [
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundColor: color.withOpacity(0.1),
+                      child: Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
+                        style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13))),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(s.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                      Text('${s.className}-${s.section} | Roll: ${s.rollNo}',
+                        style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                    ])),
+                    Text('$attPct%', style: TextStyle(fontWeight: FontWeight.bold,
+                      color: color, fontSize: 14)),
+                  ]),
+                  const SizedBox(height: 8),
+                  ClipRRect(borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(value: attPct / 100, color: color,
+                      backgroundColor: color.withOpacity(0.1), minHeight: 6)),
+                  const SizedBox(height: 4),
+                  Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                    _attBadge('Present', '42', Colors.green),
+                    _attBadge('Absent', '3', Colors.red),
+                    _attBadge('Late', '2', Colors.orange),
+                    _attBadge('Total', '47', Colors.blue),
+                  ]),
+                ]),
+              ));
+          }),
+      ]),
+    );
+  }
+
+  Widget _attBadge(String label, String val, Color color) =>
+    Column(children: [
+      Text(val, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: color)),
+      Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+    ]);
+
+
+  // Fee Report - Class + Student selector with fee breakdown
+  Widget _feeReport() {
+    final sp = context.watch<StudentProvider>();
+    final fp = context.watch<FeeProvider>();
+    final students = sp.students;
+    final classes = students.map((s) => '${s.className}-${s.section}').toSet().toList()..sort();
+    final classStudents = _feeSelectedClass == null ? students
+      : students.where((s) => '${s.className}-${s.section}' == _feeSelectedClass).toList();
+
+    // Total fee stats from real FeeProvider
+    final totalCollected = fp.fees.where((f) => f.status == 'paid').fold(0.0, (s, f) => s + f.amount);
+    final totalPending = fp.fees.where((f) => f.status == 'pending').fold(0.0, (s, f) => s + f.amount);
+    final totalOverdue = fp.fees.where((f) => f.status == 'overdue').fold(0.0, (s, f) => s + f.amount);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        _header('Fee Collection Report', 'June 2025', Icons.payments, const Color(0xFFE65100)),
+        const SizedBox(height: 16),
+        Row(children: [
+          _sumCard('Collected', 'Rs ${(totalCollected/1000).toStringAsFixed(1)}K', Colors.green),
+          const SizedBox(width: 10),
+          _sumCard('Pending', 'Rs ${(totalPending/1000).toStringAsFixed(1)}K', Colors.orange),
+          const SizedBox(width: 10),
+          _sumCard('Overdue', 'Rs ${(totalOverdue/1000).toStringAsFixed(1)}K', Colors.red),
+        ]),
+        const SizedBox(height: 16),
+
+        // Class selector
+        _sectionTitle('Select Class'),
+        const SizedBox(height: 8),
+        SizedBox(height: 38,
+          child: ListView(scrollDirection: Axis.horizontal, children: [
+            GestureDetector(
+              onTap: () => setState(() { _feeSelectedClass = null; _feeSelectedStudent = null; }),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _feeSelectedClass == null ? const Color(0xFFE65100) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20)),
+                child: Text('All Classes',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: _feeSelectedClass == null ? Colors.white : Colors.grey.shade700)),
+              ),
+            ),
+            ...classes.map((cls) => GestureDetector(
+              onTap: () => setState(() { _feeSelectedClass = cls; _feeSelectedStudent = null; }),
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: _feeSelectedClass == cls ? const Color(0xFFE65100) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(20)),
+                child: Text(cls,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+                    color: _feeSelectedClass == cls ? Colors.white : Colors.grey.shade700)),
+              ),
+            )),
+          ])),
+        const SizedBox(height: 16),
+
+        // Fee type breakdown
+        _sectionTitle('Fee Type Breakdown'),
+        ...([
+          ['Tuition Fee',   Colors.blue],
+          ['Hostel Fee',    Colors.purple],
+          ['Transport Fee', Colors.orange],
+          ['Exam Fee',      Colors.teal],
+          ['Library Fee',   Colors.green],
+        ].map((ft) {
+          final feesOfType = fp.fees.where((f) => f.feeType == ft[0]);
+          final collected = feesOfType.where((f) => f.status == 'paid').fold(0.0, (s, f) => s + f.amount);
+          final pending = feesOfType.where((f) => f.status != 'paid').fold(0.0, (s, f) => s + f.amount);
+          final total = collected + pending;
+          final ratio = total > 0 ? collected / total : 0.0;
+          final color = ft[1] as Color;
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(padding: const EdgeInsets.all(12),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Row(children: [
+                    Container(width: 10, height: 10,
+                      decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                    const SizedBox(width: 8),
+                    Text(ft[0] as String, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  ]),
+                  Text('Rs ${collected.toStringAsFixed(0)}',
+                    style: TextStyle(color: color, fontWeight: FontWeight.w600, fontSize: 12)),
+                ]),
+                const SizedBox(height: 6),
+                ClipRRect(borderRadius: BorderRadius.circular(6),
+                  child: LinearProgressIndicator(value: ratio as double, color: color,
+                    backgroundColor: color.withOpacity(0.1), minHeight: 10)),
+                const SizedBox(height: 4),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Text('${(ratio * 100).toStringAsFixed(0)}% collected',
+                    style: TextStyle(fontSize: 11, color: color)),
+                  Text('Pending: Rs ${pending.toStringAsFixed(0)}',
+                    style: const TextStyle(fontSize: 11, color: Colors.orange)),
+                ]),
+              ])));
+        })).toList(),
+        const SizedBox(height: 16),
+
+        // Student-wise fee breakdown
+        _sectionTitle(_feeSelectedClass != null
+          ? 'Student Fees - $_feeSelectedClass'
+          : 'All Student Fees'),
+        const SizedBox(height: 8),
+        if (classStudents.isEmpty)
+          const Center(child: Padding(padding: EdgeInsets.all(16),
+            child: Text('No students found', style: TextStyle(color: Colors.grey))))
+        else
+          ...classStudents.map((s) {
+            final sFees = fp.fees.where((f) => f.studentId == s.id).toList();
+            final sPaid = sFees.where((f) => f.status == 'paid').fold(0.0, (sum, f) => sum + f.amount);
+            final sPending = sFees.where((f) => f.status != 'paid').fold(0.0, (sum, f) => sum + f.amount);
+            final sTotal = sPaid + sPending;
+            final isExpanded = _feeSelectedStudent == s.admissionNo;
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Column(children: [
+                ListTile(
+                  onTap: () => setState(() =>
+                    _feeSelectedStudent = isExpanded ? null : s.admissionNo),
+                  leading: CircleAvatar(
+                    backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                    child: Text(s.name.isNotEmpty ? s.name[0].toUpperCase() : '?',
+                      style: const TextStyle(color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.bold))),
+                  title: Text(s.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                  subtitle: Text('${s.className}-${s.section} | ${s.admissionNo}',
+                    style: const TextStyle(fontSize: 11)),
+                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                    Column(mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end, children: [
+                      Text('Rs ${sPaid.toStringAsFixed(0)}',
+                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
+                      if (sPending > 0)
+                        Text('Pending: Rs ${sPending.toStringAsFixed(0)}',
+                          style: const TextStyle(color: Colors.red, fontSize: 10)),
+                    ]),
+                    Icon(isExpanded ? Icons.expand_less : Icons.expand_more, color: Colors.grey),
+                  ]),
+                ),
+                if (isExpanded) Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                  child: Column(children: [
+                    const Divider(height: 8),
+                    if (sFees.isEmpty)
+                      const Text('No fee records', style: TextStyle(color: Colors.grey, fontSize: 12))
+                    else
+                      ...sFees.map((f) {
+                        final fc = f.status == 'paid' ? Colors.green
+                          : f.status == 'overdue' ? Colors.red : Colors.orange;
+                        return Padding(padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(children: [
+                            Expanded(child: Text(f.feeType,
+                              style: const TextStyle(fontSize: 12))),
+                            Text('Rs ${f.amount.toStringAsFixed(0)}',
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: fc.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8)),
+                              child: Text(f.status.toUpperCase(),
+                                style: TextStyle(fontSize: 9, color: fc, fontWeight: FontWeight.bold))),
+                          ]));
+                      }),
+                    const SizedBox(height: 8),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      const Text('Total:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text('Rs ${sTotal.toStringAsFixed(0)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ]),
+                    if (sPending > 0) Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                      const Text('Pending:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red)),
+                      Text('Rs ${sPending.toStringAsFixed(0)}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.red)),
+                    ]),
+                  ]),
+                ),
+              ]));
+          }),
+      ]),
+    );
+  }
 
   // ?? Academic Report ?????????
   Widget _academicReport() => SingleChildScrollView(
@@ -727,6 +1073,12 @@ class ReportDetailScreen extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey), textAlign: TextAlign.center),
       ]),
     )));
+
+  Widget _miniStat(String label, String val, Color color) => Column(
+    children: [
+      Text(val, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: color)),
+      Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+    ]);
 
   Widget _sectionTitle(String title) => Padding(
     padding: const EdgeInsets.only(bottom: 10),
