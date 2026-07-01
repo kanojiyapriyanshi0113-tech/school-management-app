@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class TeacherDashboard extends StatelessWidget {
   const TeacherDashboard({super.key});
@@ -69,7 +70,7 @@ class TeacherDashboard extends StatelessWidget {
             _stat('Pending', '3',   Icons.assignment_late, Colors.orange),
           ]),
           const SizedBox(height: 16),
-          const Text('Quick Actions',
+          Text(context.watch<LanguageProvider>().t('quick_actions'),
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           GridView.count(

@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/hostel_provider.dart';
+import '../../providers/language_provider.dart';
 
 class StudentHostelDetailScreen extends StatefulWidget {
   const StudentHostelDetailScreen({super.key});
@@ -73,7 +74,7 @@ class _StudentHostelDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Hostel'),
+        title: Text(context.watch<LanguageProvider>().t('hostel')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/dashboard/student'),
@@ -84,8 +85,8 @@ class _StudentHostelDetailScreenState
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           isScrollable: true,
-          tabs: const [
-            Tab(text: 'Overview'),
+          tabs: [
+            Tab(text: context.watch<LanguageProvider>().t('overview')),
             Tab(text: 'Fee Payment'),
             Tab(text: 'Room History'),
             Tab(text: 'Leave'),
@@ -226,7 +227,7 @@ class _StudentHostelDetailScreenState
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           _feeStat('Total Paid', '₹${_totalPaid.toStringAsFixed(0)}',    Colors.green),
           _feeStat('Due Amount', '₹${_totalPending.toStringAsFixed(0)}', Colors.red),
-          _feeStat('Monthly Rent', '₹5,000',                               Colors.blue),
+          _feeStat('Monthly Rent', '??Rs \1,000',                               Colors.blue),
         ]),
       )),
       const SizedBox(height: 12),
@@ -725,3 +726,6 @@ class _StudentHostelDetailScreenState
     );
   }
 }
+
+
+

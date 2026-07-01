@@ -124,7 +124,6 @@ const Map<String, Map<String, String>> _t = {
     'total_absent': 'Absent',
 
     // Notices
-    'notices': 'Notices',
     'new_notice': 'New Notice',
     'all': 'All',
 

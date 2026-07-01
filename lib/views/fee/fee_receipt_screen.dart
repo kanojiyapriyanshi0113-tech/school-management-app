@@ -10,6 +10,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import '../../core/theme/app_theme.dart';
 import '../../providers/fee_provider.dart';
+import '../../providers/language_provider.dart';
 
 class FeeReceiptScreen extends StatefulWidget {
   final int feeId;
@@ -276,7 +277,7 @@ class _FeeReceiptScreenState extends State<FeeReceiptScreen> {
     if (fee == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Fee Receipt'),
+          title: Text(context.watch<LanguageProvider>().t('fee_receipt')),
           leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () => context.go('/fees'))),
         body: const Center(child: Text('Receipt not found')),
@@ -287,7 +288,7 @@ class _FeeReceiptScreenState extends State<FeeReceiptScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fee Receipt'),
+        title: Text(context.watch<LanguageProvider>().t('fee_receipt')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/fees')),
@@ -442,7 +443,7 @@ class _FeeReceiptScreenState extends State<FeeReceiptScreen> {
             child: OutlinedButton.icon(
               onPressed: () => _downloadPdf(context, fee),
               icon: const Icon(Icons.download),
-              label: const Text('Download PDF'),
+              label: Text(context.watch<LanguageProvider>().t('download_pdf')),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.green,
                 side: const BorderSide(color: Colors.green)),

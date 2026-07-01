@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StudentIdCardScreen extends StatelessWidget {
   const StudentIdCardScreen({super.key});
@@ -51,7 +52,7 @@ class StudentIdCardScreen extends StatelessWidget {
                 pw.Container(
                   width: 60, height: 70,
                   decoration: pw.BoxDecoration(
-                    color: const PdfColor(1, 1, 1, 0.3),
+                    color: PdfColor.fromInt(0x4DFFFFFF),
                     borderRadius: pw.BorderRadius.circular(6),
                     border: pw.Border.all(color: PdfColors.white, width: 1.5)),
                   child: pw.Center(child: pw.Text(
@@ -114,7 +115,7 @@ class StudentIdCardScreen extends StatelessWidget {
   pw.Widget _pdfRow(String label, String value) => pw.Padding(
     padding: const pw.EdgeInsets.symmetric(vertical: 1),
     child: pw.Row(children: [
-      pw.Text('$label: ', style: pw.TextStyle(color: const PdfColor(1, 1, 1, 0.7), fontSize: 8)),
+      pw.Text('$label: ', style: pw.TextStyle(color: PdfColor.fromInt(0xB3FFFFFF), fontSize: 8)),
       pw.Text(value, style: pw.TextStyle(color: PdfColors.white,
         fontSize: 8, fontWeight: pw.FontWeight.bold)),
     ]),
@@ -128,7 +129,7 @@ class StudentIdCardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Digital ID Card'),
+        title: Text(context.watch<LanguageProvider>().t('profile')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/dashboard/student'),

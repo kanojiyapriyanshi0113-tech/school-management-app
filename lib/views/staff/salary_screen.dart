@@ -204,3 +204,4 @@ class _SalaryScreenState extends State<SalaryScreen>
     ]),
   );
 }
+

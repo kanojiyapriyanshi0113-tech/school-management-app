@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/attendance_provider.dart' show AttendanceProvider; // baseUrl
+import '../../providers/language_provider.dart';
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
@@ -229,7 +230,7 @@ class _ExamManagementScreenState extends State<ExamManagementScreen>
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => context.go(_backRoute()),
         ),
-        title: const Text('Exam Management'),
+        title: Text(context.watch<LanguageProvider>().t('exam_management')),
         actions: [
           IconButton(
             icon: const Icon(Icons.add, color: Colors.white),
@@ -517,7 +518,7 @@ class _DraftCard extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: onPublish,
                     icon: const Icon(Icons.publish, size: 16),
-                    label: const Text('Publish'),
+                    label: Text(context.watch<LanguageProvider>().t('publish')),
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white),

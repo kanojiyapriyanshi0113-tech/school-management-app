@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StudentProgressScreen extends StatefulWidget {
   const StudentProgressScreen({super.key});
@@ -106,10 +107,10 @@ class _StudentProgressScreenState extends State<StudentProgressScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Academic'),
-            Tab(text: 'Attendance'),
-            Tab(text: 'Overview'),
+          tabs: [
+            Tab(text: context.watch<LanguageProvider>().t('academic')),
+            Tab(text: context.watch<LanguageProvider>().t('attendance')),
+            Tab(text: context.watch<LanguageProvider>().t('overview')),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
 import '../../services/api_service.dart';
+import '../../providers/language_provider.dart';
 
 class AddEditStudentScreen extends StatefulWidget {
   final bool isEdit;
@@ -243,7 +244,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEdit ? 'Edit Student' : 'Add New Student'),
+        title: Text(widget.isEdit ? context.watch<LanguageProvider>().t('edit_student') : context.watch<LanguageProvider>().t('add_new_student')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/students'),
@@ -254,12 +255,12 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           isScrollable: true,
-          tabs: const [
-            Tab(text: 'Personal'),
-            Tab(text: 'Admission'),
-            Tab(text: 'Parent'),
-            Tab(text: 'Fee'),
-            Tab(text: 'Documents'),
+          tabs: [
+            Tab(text: context.watch<LanguageProvider>().t('personal')),
+            Tab(text: context.watch<LanguageProvider>().t('admission')),
+            Tab(text: context.watch<LanguageProvider>().t('parent')),
+            Tab(text: context.watch<LanguageProvider>().t('fee')),
+            Tab(text: context.watch<LanguageProvider>().t('documents')),
           ],
         ),
       ),

@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StaffDetailScreen extends StatelessWidget {
   final int staffId;
@@ -44,17 +45,17 @@ class StaffDetailScreen extends StatelessWidget {
           DefaultTabController(
             length: 5,
             child: Column(children: [
-              const TabBar(
+              TabBar(
                 isScrollable: true,
                 labelColor: AppTheme.primaryColor,
                 unselectedLabelColor: Colors.grey,
                 indicatorColor: AppTheme.primaryColor,
                 tabs: [
-                  Tab(text: 'Personal'),
+                  Tab(text: context.watch<LanguageProvider>().t('personal')),
                   Tab(text: 'Professional'),
-                  Tab(text: 'Attendance'),
+                  Tab(text: context.watch<LanguageProvider>().t('attendance')),
                   Tab(text: 'Salary'),
-                  Tab(text: 'Documents'),
+                  Tab(text: context.watch<LanguageProvider>().t('documents')),
                 ],
               ),
               SizedBox(
@@ -131,14 +132,14 @@ class StaffDetailScreen extends StatelessWidget {
     padding: const EdgeInsets.all(16),
     child: Column(children: [
       _infoCard('June 2025 Salary', [
-        _row('Basic Salary', '₹10,000'),
-        _row('HRA', '₹10,000'),
-        _row('TA', '₹1,000'),
-        _row('Other Allowance', '₹1,000'),
-        _row('Gross Salary', '₹1,10,000'),
-        _row('PF Deduction', '₹1,600'),
-        _row('Tax', '₹1,000'),
-        _row('Net Salary', '₹12,400'),
+        _row('Basic Salary', '??Rs \10,000'),
+        _row('HRA', '??Rs \10,000'),
+        _row('TA', '??Rs \1,000'),
+        _row('Other Allowance', '??Rs \1,000'),
+        _row('Gross Salary', '??Rs \1,10,000'),
+        _row('PF Deduction', '??Rs \1,600'),
+        _row('Tax', '??Rs \1,000'),
+        _row('Net Salary', '??Rs \12,400'),
       ]),
     ]),
   );

@@ -141,3 +141,4 @@ class HostelDashboard extends StatelessWidget {
     Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
   ]);
 }
+

@@ -12,6 +12,7 @@ import 'hostel_fee_screen.dart';
 import 'hostel_attendance_screen.dart';
 import 'complaint_screen.dart';
 import 'hostel_reports_screen.dart';
+import '../../providers/language_provider.dart';
 
 class HostelScreen extends StatefulWidget {
   const HostelScreen({super.key});
@@ -37,9 +38,10 @@ class _HostelScreenState extends State<HostelScreen>
 
   @override
   Widget build(BuildContext context) {
+    final role = context.watch<AuthProvider>().user?.role;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hostel Management'),
+        title: Text(context.watch<LanguageProvider>().t('hostel')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
@@ -53,13 +55,13 @@ class _HostelScreenState extends State<HostelScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
+          tabs: [
             Tab(text: 'Dashboard'),
             Tab(text: 'Hostels'),
             Tab(text: 'Rooms'),
-            Tab(text: 'Students'),
+            Tab(text: context.watch<LanguageProvider>().t('students')),
             Tab(text: 'Fees'),
-            Tab(text: 'Attendance'),
+            Tab(text: context.watch<LanguageProvider>().t('attendance')),
             Tab(text: 'Complaints'),
             Tab(text: 'Reports'),
           ],
@@ -67,17 +69,18 @@ class _HostelScreenState extends State<HostelScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          const HostelDashboard(),
-          const HostelMasterScreen(),
-          const RoomManagementScreen(),
-          const StudentHostelDetailScreen(),
-          const HostelFeeScreen(),
-          const HostelAttendanceScreen(),
-          const ComplaintScreen(),
-          const HostelReportsScreen(),
+        children: const [
+          HostelDashboard(),
+          HostelMasterScreen(),
+          RoomManagementScreen(),
+          StudentHostelScreen(),
+          HostelFeeScreen(),
+          HostelAttendanceScreen(),
+          ComplaintScreen(),
+          HostelReportsScreen(),
         ],
       ),
     );
   }
 }
+

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/staff_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StaffDashboard extends StatefulWidget {
   const StaffDashboard({super.key});
@@ -41,7 +42,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Staff Management'),
+        title: Text(context.watch<LanguageProvider>().t('staff')),
         actions: [
           Stack(children: [
             IconButton(
@@ -93,7 +94,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
       ListTile(
         dense: true,
         leading: const Icon(Icons.logout, color: Colors.white60, size: 18),
-        title: const Text('Logout', style: TextStyle(color: Colors.white70, fontSize: 12)),
+        title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.white70, fontSize: 12)),
         onTap: () async {
           await context.read<AuthProvider>().logout();
           if (context.mounted) context.go('/login');
@@ -123,7 +124,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
       )).toList())),
       ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),
-        title: const Text('Logout', style: TextStyle(color: Colors.red)),
+        title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.red)),
         onTap: () async {
           await context.read<AuthProvider>().logout();
           if (context.mounted) context.go('/login');
@@ -195,7 +196,7 @@ class _StaffDashboardState extends State<StaffDashboard> {
         const SizedBox(height: 20),
 
         // Quick Actions ? Add Staff NAHI hai
-        const Text('Quick Actions',
+        Text(context.watch<LanguageProvider>().t('quick_actions'),
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Row(children: [
@@ -266,3 +267,8 @@ class _StaffDashboardState extends State<StaffDashboard> {
       style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12)),
   );
 }
+
+
+
+
+

@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StudentListScreen extends StatefulWidget {
   const StudentListScreen({super.key});
@@ -54,7 +55,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
     final p = context.watch<StudentProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Students'),
+        title: Text(context.watch<LanguageProvider>().t('students')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go((() {
@@ -130,7 +131,7 @@ class _StudentListScreenState extends State<StudentListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/students/add'),
         icon: const Icon(Icons.person_add),
-        label: const Text('Add Student'),
+        label: Text(context.watch<LanguageProvider>().t('add_student')),
         backgroundColor: AppTheme.primaryColor,
       ),
       body: Column(children: [
@@ -312,3 +313,4 @@ class _StudentListScreenState extends State<StudentListScreen> {
                 color: color)),
       ]);
 }
+

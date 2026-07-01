@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/library_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/library_model.dart';
+import '../../providers/language_provider.dart';
 
 class LibraryDashboard extends StatelessWidget {
   const LibraryDashboard({super.key});
@@ -91,7 +92,7 @@ class LibraryDashboard extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Recent activity
-        const Text('Recent Activity', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text(context.watch<LanguageProvider>().t('recent_activity'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         ...p.issues.take(5).map((issue) {
           final color = issue.status == 'returned' ? Colors.green

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -14,7 +14,7 @@ class StudentDashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.watch<LanguageProvider>().t('student_dashboard')),
+        title: Text('Student Dashboard'),
         actions: [
           IconButton(icon: const Icon(Icons.notifications_outlined), onPressed: () {}),
           Padding(
@@ -68,7 +68,7 @@ class StudentDashboard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Quick Access
-          Text(context.watch<LanguageProvider>().t('quick_actions'),
+          Text('Quick Actions',
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: 10),
           GridView.count(
@@ -182,7 +182,7 @@ class StudentDashboard extends StatelessWidget {
       const Divider(),
       ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),
-        title: const Text('Logout', style: TextStyle(color: Colors.red)),
+        title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.red)),
         onTap: () async {
           await context.read<AuthProvider>().logout();
           if (context.mounted) context.go('/login');
@@ -230,3 +230,5 @@ class StudentDashboard extends StatelessWidget {
     trailing: Text(date, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500)),
   );
 }
+
+

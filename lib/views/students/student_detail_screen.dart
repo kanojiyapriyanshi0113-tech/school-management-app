@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../providers/student_provider.dart';
 import '../../providers/fee_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StudentDetailScreen extends StatefulWidget {
   final int studentId;
@@ -145,7 +146,7 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Profile'),
+        title: Text(context.watch<LanguageProvider>().t('student_profile')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/students')),
@@ -203,9 +204,9 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
           labelColor: AppTheme.primaryColor,
           unselectedLabelColor: Colors.grey,
           indicatorColor: AppTheme.primaryColor,
-          tabs: const [
-            Tab(text: 'Personal'), Tab(text: 'Academic'), Tab(text: 'Attendance'),
-            Tab(text: 'Fees'), Tab(text: 'Health'), Tab(text: 'Transport'),
+          tabs: [
+            Tab(text: context.watch<LanguageProvider>().t('personal')), Tab(text: context.watch<LanguageProvider>().t('academic')), Tab(text: context.watch<LanguageProvider>().t('attendance')),
+            Tab(text: 'Fees'), Tab(text: context.watch<LanguageProvider>().t('health')), Tab(text: context.watch<LanguageProvider>().t('transport')),
           ],
         ),
 

@@ -1,9 +1,10 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/student_provider.dart';
 import '../../services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class CreateFeeScreen extends StatefulWidget {
   const CreateFeeScreen({super.key});
@@ -60,7 +61,7 @@ class _CreateFeeScreenState extends State<CreateFeeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Collect Fee'),
+        title: Text(context.watch<LanguageProvider>().t('collect_fee')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/fees')),
@@ -435,3 +436,5 @@ class _CreateFeeScreenState extends State<CreateFeeScreen> {
         fontWeight: FontWeight.w600, color: color)),
     ]));
 }
+
+

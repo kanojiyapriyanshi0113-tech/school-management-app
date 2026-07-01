@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import '../../providers/staff_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class StaffListScreen extends StatefulWidget {
   const StaffListScreen({super.key});
@@ -36,7 +37,7 @@ class _StaffListScreenState extends State<StaffListScreen> {
     final p = context.watch<StaffProvider>();
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white), onPressed: () => context.go((() { final role = context.read<AuthProvider>().user?.role; return role == 'staff' ? '/dashboard/staff' : role == 'student' ? '/dashboard/student' : role == 'parent' ? '/dashboard/parent' : '/dashboard/admin'; })())),title: const Text('Staff List')),
+        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white), onPressed: () => context.go((() { final role = context.read<AuthProvider>().user?.role; return role == 'staff' ? '/dashboard/staff' : role == 'student' ? '/dashboard/student' : role == 'parent' ? '/dashboard/parent' : '/dashboard/admin'; })())),title: Text(context.watch<LanguageProvider>().t('staff'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/staff/add'),
         icon: const Icon(Icons.person_add),
@@ -200,3 +201,11 @@ class _StaffCard extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+
+

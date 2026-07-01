@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/exam_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class ExamListScreen extends StatefulWidget {
   const ExamListScreen({super.key});
@@ -38,7 +39,7 @@ class _ExamListScreenState extends State<ExamListScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exams'),
+        title: Text(context.watch<LanguageProvider>().t('exams')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () {
@@ -68,13 +69,13 @@ class _ExamListScreenState extends State<ExamListScreen>
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Icon(Icons.drafts, size: 16),
                 const SizedBox(width: 6),
-                Text('Drafts (${drafts.length})'),
+                Text(context.watch<LanguageProvider>().t('drafts') + ' (${drafts.length})'),
               ])),
             Tab(
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Icon(Icons.publish, size: 16),
                 const SizedBox(width: 6),
-                Text('Published (${published.length})'),
+                Text(context.watch<LanguageProvider>().t('published') + ' (${published.length})'),
               ])),
           ]),
       ),
@@ -126,7 +127,7 @@ class _ExamListScreenState extends State<ExamListScreen>
       floatingActionButton: isAdmin ? FloatingActionButton.extended(
         onPressed: () => context.push('/exams/create'),
         icon: const Icon(Icons.add),
-        label: const Text('New Exam')) : null,
+        label: Text(context.watch<LanguageProvider>().t('new_exam'))) : null,
     );
   }
 
@@ -213,7 +214,7 @@ class _ExamListScreenState extends State<ExamListScreen>
                 if (isDraft) Expanded(child: ElevatedButton.icon(
                   onPressed: () => _publishExam(context, exam, p),
                   icon: const Icon(Icons.publish, size: 16),
-                  label: const Text('Publish'),
+                  label: Text(context.watch<LanguageProvider>().t('publish')),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
@@ -224,14 +225,14 @@ class _ExamListScreenState extends State<ExamListScreen>
                   Expanded(child: OutlinedButton.icon(
                     onPressed: () => context.push('/exams/results'),
                     icon: const Icon(Icons.bar_chart, size: 16),
-                    label: const Text('Results'),
+                    label: Text(context.watch<LanguageProvider>().t('results')),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 10)))),
                   const SizedBox(width: 8),
                   Expanded(child: ElevatedButton.icon(
                     onPressed: () => context.push('/exams/marks/${exam.id}'),
                     icon: const Icon(Icons.edit, size: 16),
-                    label: const Text('Marks'),
+                    label: Text(context.watch<LanguageProvider>().t('marks')),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
                       foregroundColor: Colors.white,

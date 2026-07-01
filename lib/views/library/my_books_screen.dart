@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/library_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class MyBooksScreen extends StatefulWidget {
   const MyBooksScreen({super.key});
@@ -59,13 +60,13 @@ class _MyBooksScreenState extends State<MyBooksScreen> {
             ]),
           ),
           // Tabs
-          const TabBar(
+          TabBar(
             indicatorColor: AppTheme.primaryColor,
             labelColor: AppTheme.primaryColor,
             unselectedLabelColor: Colors.grey,
             tabs: [
-              Tab(text: 'Active'),
-              Tab(text: 'Overdue'),
+              Tab(text: context.watch<LanguageProvider>().t('active')),
+              Tab(text: context.watch<LanguageProvider>().t('overdue')),
               Tab(text: 'History'),
             ],
           ),

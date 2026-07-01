@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/staff_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class LeaveManagementScreen extends StatefulWidget {
   const LeaveManagementScreen({super.key});
@@ -36,7 +37,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Leave Management'),
+        title: Text(context.watch<LanguageProvider>().t('attendance')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
@@ -51,7 +52,7 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
           unselectedLabelColor: Colors.white70,
           tabs: [
             const Tab(text: 'All Leaves'),
-            if (isAdmin) const Tab(text: 'Pending'),
+            if (isAdmin) Tab(text: context.watch<LanguageProvider>().t('pending')),
             const Tab(text: 'Apply Leave'),
           ],
         ),
@@ -244,3 +245,6 @@ class _LeaveManagementScreenState extends State<LeaveManagementScreen>
     )),
   );
 }
+
+
+

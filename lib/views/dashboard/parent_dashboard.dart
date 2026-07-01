@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -28,7 +28,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.watch<LanguageProvider>().t('parent_dashboard')),
+        title: Text('Parent Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.language),
@@ -66,7 +66,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
 
                 // ── Children Section ──
                 Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                  Text(context.watch<LanguageProvider>().t('my_children'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  Text('My Children', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
@@ -143,7 +143,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
                 ],
 
                 // Quick Access
-                const Text('Quick Access', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                Text(context.watch<LanguageProvider>().t('quick_actions'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
                 GridView.count(
                   shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
@@ -290,7 +290,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
                 decoration: BoxDecoration(
                   color: Colors.green.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8)),
-                child: const Text('Active',
+                child: Text(context.watch<LanguageProvider>().t('active'),
                   style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.bold))),
             ]),
           ]),
@@ -376,7 +376,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.red)),
             onTap: () {
               Navigator.pop(context);
               context.read<AuthProvider>().logout();
@@ -413,7 +413,7 @@ class _ParentDashboardState extends State<ParentDashboard> {
       const Divider(),
       ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),
-        title: const Text('Logout', style: TextStyle(color: Colors.red)),
+        title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.red)),
         onTap: () async {
           await context.read<AuthProvider>().logout();
           if (context.mounted) context.go('/login');

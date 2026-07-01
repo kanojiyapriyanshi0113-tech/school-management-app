@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
@@ -9,12 +9,12 @@ class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
 
   static const _stats = [
-    {'label': 'Total Students', 'value': '1,248', 'icon': Icons.people, 'color': Color(0xFF1565C0)},
-    {'label': 'Total Staff', 'value': '86', 'icon': Icons.person, 'color': Color(0xFF2E7D32)},
-    {'label': 'Present Today', 'value': '1,104', 'icon': Icons.check_circle, 'color': Color(0xFF00838F)},
-    {'label': 'Fee Collected', 'value': 'Rs 4.2L','icon': Icons.payment, 'color': Color(0xFFE65100)},
-    {'label': 'Exams Scheduled','value': '12', 'icon': Icons.quiz, 'color': Color(0xFF6A1B9A)},
-    {'label': 'Pending Fees', 'value': 'Rs 1.1L','icon': Icons.warning_amber, 'color': Color(0xFFC62828)},
+    {'label': 'total_students', 'value': '1,248', 'icon': Icons.people, 'color': Color(0xFF1565C0)},
+    {'label': 'total_staff', 'value': '86', 'icon': Icons.person, 'color': Color(0xFF2E7D32)},
+    {'label': 'present_today', 'value': '1,104', 'icon': Icons.check_circle, 'color': Color(0xFF00838F)},
+    {'label': 'fee_collected', 'value': 'Rs 4.2L','icon': Icons.payment, 'color': Color(0xFFE65100)},
+    {'label': 'exams_scheduled','value': '12', 'icon': Icons.quiz, 'color': Color(0xFF6A1B9A)},
+    {'label': 'pending_fees', 'value': 'Rs 1.1L','icon': Icons.warning_amber, 'color': Color(0xFFC62828)},
   ];
 
   static const _navItems = [
@@ -41,7 +41,7 @@ class AdminDashboard extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.watch<LanguageProvider>().t('admin_dashboard')),
+        title: Text('School Management System'),
         actions: [
           IconButton(
             icon: const Icon(Icons.language),
@@ -90,7 +90,7 @@ class AdminDashboard extends StatelessWidget {
       ListTile(
         dense: true,
         leading: const Icon(Icons.logout, color: Colors.white60, size: 18),
-        title: const Text('Logout', style: TextStyle(color: Colors.white70, fontSize: 12)),
+        title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.white70, fontSize: 12)),
         onTap: () async {
           await context.read<AuthProvider>().logout();
           if (context.mounted) context.go('/login');
@@ -190,7 +190,7 @@ class AdminDashboard extends StatelessWidget {
           const SizedBox(height: 20),
           const Divider(),
           ListTile(leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.red)),
             onTap: () {
               Navigator.pop(context);
               context.read<AuthProvider>().logout();
@@ -229,7 +229,7 @@ class AdminDashboard extends StatelessWidget {
       const Divider(),
       ListTile(
         leading: const Icon(Icons.logout, color: Colors.red),
-        title: const Text('Logout', style: TextStyle(color: Colors.red)),
+        title: Text(context.watch<LanguageProvider>().t('logout'), style: TextStyle(color: Colors.red)),
         onTap: () async {
           await context.read<AuthProvider>().logout();
           if (context.mounted) context.go('/login');
@@ -250,7 +250,7 @@ class AdminDashboard extends StatelessWidget {
         const Text("Here's what's happening today",
           style: TextStyle(color: Colors.grey, fontSize: 13)),
         const SizedBox(height: 20),
-        Text(context.watch<LanguageProvider>().t('overview'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text('Overview', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         GridView.builder(
           shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
@@ -273,7 +273,7 @@ class AdminDashboard extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(s['value'] as String,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-                  Text(s['label'] as String,
+                  Text(context.watch<LanguageProvider>().t(s['label'] as String),
                     style: const TextStyle(fontSize: 10, color: Colors.grey)),
                 ]),
               ]),
@@ -281,7 +281,7 @@ class AdminDashboard extends StatelessWidget {
           },
         ),
         const SizedBox(height: 20),
-        Text(context.watch<LanguageProvider>().t('quick_actions'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text('Quick Actions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Row(children: [
           _qa(context, Icons.person_add, 'Add Student',  AppTheme.primaryColor, '/students/add'),
@@ -293,7 +293,7 @@ class AdminDashboard extends StatelessWidget {
           _qa(context, Icons.payment, 'Collect Fee',  const Color(0xFFE65100), '/fees/create'),
         ]),
         const SizedBox(height: 20),
-        Text(context.watch<LanguageProvider>().t('recent_activity'), style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+        Text('Recent Activity', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         const SizedBox(height: 10),
         Card(child: Column(children: [
           _act(Icons.person_add, 'New student Rahul Kumar admitted to Class 10-A', '10 min ago'),
@@ -333,3 +333,6 @@ class AdminDashboard extends StatelessWidget {
     subtitle: Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
   );
 }
+
+
+

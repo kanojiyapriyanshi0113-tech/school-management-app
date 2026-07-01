@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/attendance_provider.dart';
+import '../../providers/language_provider.dart';
 
 class MarkAttendanceScreen extends StatefulWidget {
   const MarkAttendanceScreen({super.key});
@@ -89,7 +90,7 @@ class _MarkAttendanceScreenState extends State<MarkAttendanceScreen>
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
           onPressed: () => context.go(_backRoute(context)),
         ),
-        title: const Text('Mark Attendance'),
+        title: Text(context.watch<LanguageProvider>().t('mark_attendance')),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,

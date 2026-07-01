@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/language_provider.dart';
@@ -208,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
           alignment: Alignment.centerRight,
           child: TextButton(
             onPressed: () {},
-            child: const Text('Forgot Password?',
+            child: Text(context.watch<LanguageProvider>().t('forgot_password'),
               style: TextStyle(fontSize: 12)),
           ),
         ),
@@ -229,3 +229,4 @@ class _LoginScreenState extends State<LoginScreen> {
     ),
   );
 }
+

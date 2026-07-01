@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/notice_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class NoticeBoardScreen extends StatefulWidget {
   const NoticeBoardScreen({super.key});
@@ -28,7 +29,7 @@ class _NoticeBoardScreenState extends State<NoticeBoardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notice Board'),
+        title: Text(context.watch<LanguageProvider>().t('notices')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {

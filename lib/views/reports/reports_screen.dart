@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -33,7 +34,7 @@ class _ReportsScreenState extends State<ReportsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reports & Analytics'),
+        title: Text(context.watch<LanguageProvider>().t('reports_analytics')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
@@ -47,12 +48,12 @@ class _ReportsScreenState extends State<ReportsScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Overview'),
-            Tab(text: 'Attendance'),
-            Tab(text: 'Academic'),
+          tabs: [
+            Tab(text: context.watch<LanguageProvider>().t('overview')),
+            Tab(text: context.watch<LanguageProvider>().t('attendance')),
+            Tab(text: context.watch<LanguageProvider>().t('academic')),
             Tab(text: 'Finance'),
-            Tab(text: 'All Reports'),
+            Tab(text: context.watch<LanguageProvider>().t('all_reports')),
           ],
         ),
       ),
@@ -231,7 +232,7 @@ class _ReportsScreenState extends State<ReportsScreen>
       SizedBox(width: double.infinity, child: OutlinedButton.icon(
         onPressed: () => _exportPdf(context, 'Attendance Report'),
         icon: const Icon(Icons.picture_as_pdf),
-        label: const Text('Export PDF'),
+        label: Text(context.watch<LanguageProvider>().t('export_pdf')),
       )),
     ]),
   );
@@ -579,3 +580,5 @@ class _ReportsScreenState extends State<ReportsScreen>
     Text(label, style: const TextStyle(fontSize: 11)),
   ]);
 }
+
+

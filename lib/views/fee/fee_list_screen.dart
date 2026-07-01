@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../providers/fee_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class FeeListScreen extends StatefulWidget {
   const FeeListScreen({super.key});
@@ -36,7 +37,7 @@ class _FeeListScreenState extends State<FeeListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fee Management'),
+        title: Text(context.watch<LanguageProvider>().t('fee_management')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go(
@@ -312,3 +313,7 @@ class _FeeListScreenState extends State<FeeListScreen> {
     Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
   ]);
 }
+
+
+
+

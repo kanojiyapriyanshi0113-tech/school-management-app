@@ -12,6 +12,7 @@ import 'transport_fee_screen.dart';
 import 'transport_attendance_screen.dart';
 import 'transport_tracking_screen.dart';
 import 'transport_reports_screen.dart';
+import '../../providers/language_provider.dart';
 
 class TransportScreen extends StatefulWidget {
   const TransportScreen({super.key});
@@ -41,7 +42,7 @@ class _TransportScreenState extends State<TransportScreen>
     final role = context.watch<AuthProvider>().user?.role;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transport Management'),
+        title: Text(context.watch<LanguageProvider>().t('transport')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go(

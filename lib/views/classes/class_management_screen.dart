@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../services/api_service.dart';
+import '../../providers/language_provider.dart';
 
 class ClassModel {
   final int id;
@@ -81,7 +82,7 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Management'),
+        title: Text(context.watch<LanguageProvider>().t('classes')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go('/dashboard/admin'),
@@ -244,3 +245,7 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
     );
   }
 }
+
+
+
+

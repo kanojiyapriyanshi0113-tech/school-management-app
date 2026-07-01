@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../providers/staff_provider.dart';
+import '../../providers/language_provider.dart';
 
 class AddEditStaffScreen extends StatefulWidget {
   final bool isEdit;
@@ -156,10 +157,10 @@ class _AddEditStaffScreenState extends State<AddEditStaffScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Personal'),
+          tabs: [
+            Tab(text: context.watch<LanguageProvider>().t('personal')),
             Tab(text: 'Professional'),
-            Tab(text: 'Documents'),
+            Tab(text: context.watch<LanguageProvider>().t('documents')),
           ],
         ),
       ),

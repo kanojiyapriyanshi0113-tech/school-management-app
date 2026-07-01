@@ -10,6 +10,7 @@ import 'return_book_screen.dart';
 import 'my_books_screen.dart';
 import 'library_notifications_screen.dart';
 import 'library_reports_screen.dart';
+import '../../providers/language_provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -98,7 +99,7 @@ class _LibraryScreenState extends State<LibraryScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Library'),
+        title: Text(context.watch<LanguageProvider>().t('library')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {

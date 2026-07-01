@@ -12,7 +12,9 @@ import 'providers/transport_provider.dart';
 import 'providers/library_provider.dart';
 import 'providers/admission_provider.dart';
 import 'providers/theme_provider.dart';
-import 'providers/staff_provider.dart';        // ??? ADD
+import 'providers/staff_provider.dart';
+import 'providers/parent_provider.dart';
+import 'providers/language_provider.dart';
 import 'routes/app_router.dart';
 
 void main() {
@@ -22,13 +24,16 @@ void main() {
 
 class SchoolManagementApp extends StatelessWidget {
   const SchoolManagementApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => StudentProvider()),
+        ChangeNotifierProvider(create: (_) => ParentProvider()),
         ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         ChangeNotifierProvider(create: (_) => FeeProvider()),
         ChangeNotifierProvider(create: (_) => ExamProvider()),
@@ -37,29 +42,22 @@ class SchoolManagementApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TransportProvider()),
         ChangeNotifierProvider(create: (_) => LibraryProvider()),
         ChangeNotifierProvider(create: (_) => AdmissionProvider()),
-        ChangeNotifierProvider(create: (_) => StaffProvider()),  // ??? ADD
+        ChangeNotifierProvider(create: (_) => StaffProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, _) {
+      child: Consumer2<ThemeProvider, LanguageProvider>(
+        builder: (context, themeProvider, langProvider, _) {
           return MaterialApp.router(
-            title: 'School Management App',
+            title: langProvider.t('app_name'),
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
             routerConfig: AppRouter.router,
+            // Key forces full rebuild when language changes
+            key: ValueKey(langProvider.langCode),
           );
         },
       ),
     );
   }
 }
-
-
-
-
-
-
-
-
-

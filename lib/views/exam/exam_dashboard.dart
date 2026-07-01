@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/exam_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/language_provider.dart';
 
 class ExamDashboard extends StatefulWidget {
   const ExamDashboard({super.key});
@@ -27,7 +28,7 @@ class _ExamDashboardState extends State<ExamDashboard> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exam Management'),
+        title: Text(context.watch<LanguageProvider>().t('exam_management')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () => context.go(
@@ -259,3 +260,5 @@ class _ExamDashboardState extends State<ExamDashboard> {
     Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
   ]);
 }
+
+

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import '../services/api_service.dart';
 
 enum LoadStatus { idle, loading, loaded, error }

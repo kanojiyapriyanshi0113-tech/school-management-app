@@ -1,4 +1,4 @@
-﻿import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +33,7 @@ class StaffReportsScreen extends StatelessWidget {
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
                 _quickStat('Total Staff', '48', Colors.blue),
                 _quickStat('Avg Attendance', '89%', Colors.green),
-                _quickStat('Salary Paid', '₹18.5L', Colors.orange),
+                _quickStat('Salary Paid', '??Rs \18.5L', Colors.orange),
                 _quickStat('Leaves', '23', Colors.purple),
               ]),
             ]),

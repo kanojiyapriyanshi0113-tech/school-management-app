@@ -260,3 +260,5 @@ class _VehicleManagementScreenState extends State<VehicleManagementScreen> {
       color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
     child: Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)));
 }
+
+
