@@ -6,7 +6,12 @@ import '../../core/theme/app_theme.dart';
 import '../../providers/language_provider.dart';
 
 class ResultScreen extends StatelessWidget {
-  const ResultScreen({super.key});
+  // When provided, only this student's result is shown (class/student select flow).
+  final String? studentName;
+  final String? studentRoll;
+  final String? className;
+
+  const ResultScreen({super.key, this.studentName, this.studentRoll, this.className});
 
   static const _results = [
     {'name': 'Priya Singh', 'roll': 'R002', 'total': 487, 'max': 500, 'percent': '97.4%', 'grade': 'A+', 'color': 0xFF2E7D32},
@@ -19,12 +24,21 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Single-student mode: filter to just the selected student's result.
+    final isSingleStudent = studentRoll != null;
+    final filteredResults = isSingleStudent
+      ? _results.where((r) => r['roll'] == studentRoll).toList()
+      : _results;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(context.watch<LanguageProvider>().t('results')),
+        title: Text(isSingleStudent
+          ? (studentName ?? context.watch<LanguageProvider>().t('results'))
+          : context.watch<LanguageProvider>().t('results')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
+            if (isSingleStudent) { context.pop(); return; }
             final r = context.read<AuthProvider>().user?.role;
             context.go(r == 'student' ? '/dashboard/student'
               : r == 'staff' ? '/dashboard/staff'
@@ -36,24 +50,39 @@ class ResultScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           // Header
-          const Text('Mid-Term Exam 2025 - Class 10-A',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          Text(isSingleStudent
+              ? 'Mid-Term Exam 2025 - ${className ?? ''}'
+              : 'Mid-Term Exam 2025 - Class 10-A',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
           const Text('Total Marks: 500',
             style: TextStyle(color: Colors.grey, fontSize: 13)),
           const SizedBox(height: 16),
 
-          // Summary cards
-          Row(children: [
-            _sumCard('84.8%', 'Class Avg', Colors.blue),
-            const SizedBox(width: 10),
-            _sumCard('97.4%', 'Highest', Colors.green),
-            const SizedBox(width: 10),
-            _sumCard('100%', 'Pass Rate', Colors.teal),
-          ]),
-          const SizedBox(height: 16),
+          if (!isSingleStudent) ...[
+            // Summary cards (only shown in full class view)
+            Row(children: [
+              _sumCard('84.8%', 'Class Avg', Colors.blue),
+              const SizedBox(width: 10),
+              _sumCard('97.4%', 'Highest', Colors.green),
+              const SizedBox(width: 10),
+              _sumCard('100%', 'Pass Rate', Colors.teal),
+            ]),
+            const SizedBox(height: 16),
+          ],
+
+          if (isSingleStudent && filteredResults.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(child: Column(children: [
+                Icon(Icons.assignment_late_outlined, size: 56, color: Colors.grey.shade300),
+                const SizedBox(height: 12),
+                Text('No exam result published yet for ${studentName ?? 'this student'}',
+                  style: const TextStyle(color: Colors.grey), textAlign: TextAlign.center),
+              ])),
+            ),
 
           // Results list
-          ..._results.asMap().entries.map((entry) {
+          ...filteredResults.asMap().entries.map((entry) {
             final i = entry.key;
             final r = entry.value;
             final color = Color(r['color'] as int);

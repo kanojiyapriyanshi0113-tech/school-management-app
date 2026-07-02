@@ -116,19 +116,6 @@ class _StudentHomeworkScreenState extends State<StudentHomeworkScreen>
                   style: TextStyle(fontSize: 11, color: isPending ? Colors.red : Colors.grey,
                     fontWeight: isPending ? FontWeight.w600 : FontWeight.normal)),
               ]),
-              if (isPending) ...[
-                const SizedBox(height: 10),
-                SizedBox(width: double.infinity, child: ElevatedButton.icon(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Marked as submitted!'), backgroundColor: Colors.green));
-                    setState(() => _homework.firstWhere((hw) => hw['title'] == h['title'])['status'] = 'submitted');
-                  },
-                  icon: const Icon(Icons.check, size: 16),
-                  label: const Text('Mark as Submitted'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                )),
-              ],
             ]),
           ),
         );

@@ -40,7 +40,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
 
   // Fee tab fields
   final _admissionFee = TextEditingController(text: '5000');
-  final _tuitionFee = TextEditingController(text: '12500');
+  final _feeAmount = TextEditingController();
   final _transportFee = TextEditingController(text: '3500');
   final _hostelFee = TextEditingController(text: '5000');
   String _feeFrequency = 'Monthly';
@@ -113,7 +113,8 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
     _admissionDate.dispose(); _fatherName.dispose(); _motherName.dispose();
     _parentPhone.dispose(); _parentEmail.dispose(); _parentOccupation.dispose();
     _emergencyContact.dispose(); _medicalInfo.dispose();
-    _admissionFee.dispose(); _tuitionFee.dispose();
+    _admissionFee.dispose();
+    _feeAmount.dispose();
     _transportFee.dispose(); _hostelFee.dispose();
     super.dispose();
   }
@@ -180,6 +181,16 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
     // Fee records create karo (sirf naye student ke liye, agar fee set ki ho)
     if (ok && !widget.isEdit && newStudentId != null) {
       try {
+        if (_feeAmount.text.isNotEmpty && double.tryParse(_feeAmount.text) != null) {
+          await apiService.post('/fees', {
+            'student_id': newStudentId,
+            'fee_type': 'Fee',
+            'amount': double.parse(_feeAmount.text),
+            'due_date': '',
+            'payment_mode': _feePaymentMethod,
+            'status': 'pending',
+          });
+        }
         if (_admissionFee.text.isNotEmpty && double.tryParse(_admissionFee.text) != null) {
           await apiService.post('/fees', {
             'student_id': newStudentId,
@@ -190,16 +201,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
             'status': 'pending',
           });
         }
-        if (_tuitionFee.text.isNotEmpty && double.tryParse(_tuitionFee.text) != null) {
-          await apiService.post('/fees', {
-            'student_id': newStudentId,
-            'fee_type': 'Tuition Fee',
-            'amount': double.parse(_tuitionFee.text),
-            'due_date': '',
-            'payment_mode': _feePaymentMethod,
-            'status': 'pending',
-          });
-        }
+
         if (_includeTransportFee && _transportFee.text.isNotEmpty) {
           await apiService.post('/fees', {
             'student_id': newStudentId,
@@ -649,12 +651,13 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
         const SizedBox(height: 18),
         const Text('Mandatory Fees', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         const SizedBox(height: 10),
+        _field(_feeAmount, 'Fee Amount (Rs.) *', Icons.currency_rupee,
+          type: TextInputType.number),
+        const SizedBox(height: 14),
         _field(_admissionFee, 'Admission Fee (Rs.)', Icons.school,
           type: TextInputType.number),
         const SizedBox(height: 14),
-        _field(_tuitionFee, 'Tuition Fee (Rs.)', Icons.menu_book,
-          type: TextInputType.number),
-        const SizedBox(height: 14),
+
         DropdownButtonFormField<String>(
           value: _feeFrequency,
           decoration: InputDecoration(
@@ -739,8 +742,7 @@ class _AddEditStudentScreenState extends State<AddEditStudentScreen>
       ]));
 
   double _calculateTotalFee() {
-    double total = (double.tryParse(_admissionFee.text) ?? 0) +
-                    (double.tryParse(_tuitionFee.text) ?? 0);
+    double total = (double.tryParse(_feeAmount.text) ?? 0) + (double.tryParse(_admissionFee.text) ?? 0);
     if (_includeTransportFee) total += double.tryParse(_transportFee.text) ?? 0;
     if (_includeHostelFee) total += double.tryParse(_hostelFee.text) ?? 0;
     return total;

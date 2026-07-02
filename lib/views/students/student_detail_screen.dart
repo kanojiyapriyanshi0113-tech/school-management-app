@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -382,9 +382,14 @@ class _StudentDetailScreenState extends State<StudentDetailScreen>
         if (studentFees.isNotEmpty) ...[
           const SizedBox(height: 8),
           SizedBox(width: double.infinity, child: OutlinedButton.icon(
-            onPressed: () => context.go('/fees'),
+            onPressed: () {
+              final student = context.read<StudentProvider>().selectedStudent;
+              if (student == null) return;
+              context.go(
+                '/fees?studentId=${student.id}&studentName=${Uri.encodeComponent(student.name)}');
+            },
             icon: const Icon(Icons.receipt_long),
-            label: const Text('View All Receipts'),
+            label: const Text('View Fees'),
           )),
         ],
       ]));

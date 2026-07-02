@@ -126,8 +126,7 @@ class _RouteManagementScreenState extends State<RouteManagementScreen> {
     final _morningCtrl = TextEditingController();
     final _eveningCtrl = TextEditingController();
     final _stopsCtrl = TextEditingController();
-    final _feeCtrl = TextEditingController();
-
+  
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -161,9 +160,7 @@ class _RouteManagementScreenState extends State<RouteManagementScreen> {
             decoration: const InputDecoration(
               labelText: 'Stops (comma separated)',
               hintText: 'Stop 1, Stop 2, Stop 3')),
-          const SizedBox(height: 8),
-          TextField(controller: _feeCtrl, keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Monthly Fee (Rs)')),
+
         ])),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
@@ -181,7 +178,7 @@ class _RouteManagementScreenState extends State<RouteManagementScreen> {
         'morning_time': _morningCtrl.text,
         'evening_time': _eveningCtrl.text,
         'stops': _stopsCtrl.text,
-        'monthly_fee': double.tryParse(_feeCtrl.text) ?? 0,
+        'monthly_fee': 0,
         'status': 'active',
               });
               if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
@@ -199,6 +196,3 @@ class _RouteManagementScreenState extends State<RouteManagementScreen> {
       overflow: TextOverflow.ellipsis),
   ]);
 }
-
-
-

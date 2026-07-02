@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/transport_provider.dart';
+import '../../providers/student_provider.dart';
 import '../../core/theme/app_theme.dart';
 
 class TransportFeeScreen extends StatefulWidget {
@@ -10,10 +11,39 @@ class TransportFeeScreen extends StatefulWidget {
 }
 
 class _TransportFeeScreenState extends State<TransportFeeScreen> {
+  String? _selectedClass;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TransportProvider>().fetchFees();
+      context.read<StudentProvider>().fetchStudents();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final p = context.watch<TransportProvider>();
-    final fees = p.fees;
+    final tp = context.watch<TransportProvider>();
+    final sp = context.watch<StudentProvider>();
+
+    // Students who have transport assigned
+    final transportStudents = sp.students.where((s) =>
+      s.transport.isNotEmpty || s.busRoute.isNotEmpty).toList();
+
+    // Get class list from transport students
+    final classes = transportStudents
+      .map((s) => '${s.className}-${s.section}')
+      .toSet().toList()..sort();
+
+    // Filter by selected class
+    final filtered = _selectedClass == null
+      ? transportStudents
+      : transportStudents.where((s) =>
+          '${s.className}-${s.section}' == _selectedClass).toList();
+
+    // Stats from fees
+    final fees = tp.fees;
     final collected = fees.where((f) => f.status == 'paid').fold(0.0, (s, f) => s + f.amount);
     final pending = fees.where((f) => f.status == 'pending').fold(0.0, (s, f) => s + f.amount);
 
@@ -25,147 +55,144 @@ class _TransportFeeScreenState extends State<TransportFeeScreen> {
           color: Colors.white,
           padding: const EdgeInsets.all(14),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-            _stat('Total', '${fees.length}', Colors.blue),
+            _stat('Total Students', '${transportStudents.length}', Colors.blue),
             _stat('Collected', 'Rs ${collected.toStringAsFixed(0)}', Colors.green),
             _stat('Pending', 'Rs ${pending.toStringAsFixed(0)}', Colors.orange),
           ])),
         const SizedBox(height: 8),
 
-        Expanded(child: fees.isEmpty
-          ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(Icons.receipt, size: 64, color: Colors.grey.shade300),
-              const SizedBox(height: 12),
-              const Text('No transport fees', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: () => _addFeeDialog(context),
-                icon: const Icon(Icons.add), label: const Text('Add Fee')),
-            ]))
-          : RefreshIndicator(
-              onRefresh: () => p.fetchFees(),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(14),
-                itemCount: fees.length,
-                itemBuilder: (ctx, i) => _feeCard(ctx, fees[i], p),
-              ))),
-      ]),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _addFeeDialog(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Fee')),
-    );
-  }
-
-  Widget _feeCard(BuildContext context, TransportFeeModel f, TransportProvider p) =>
-    Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(f.studentName, style: const TextStyle(fontWeight: FontWeight.bold)),
-              Text('Month: ${f.month}', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            ])),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: f.status == 'paid'
-                  ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8)),
-              child: Text(f.status.toUpperCase(),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold,
-                  color: f.status == 'paid' ? Colors.green : Colors.orange))),
-          ]),
-          const Divider(height: 12),
-          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Text('Rs ${f.amount.toStringAsFixed(0)}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor)),
-            if (f.status != 'paid') ElevatedButton.icon(
-              onPressed: () async {
-                await p.updateFeeStatus(f.id, 'paid');
-                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Fee marked as paid!'),
-                    backgroundColor: Colors.green));
-              },
-              icon: const Icon(Icons.check, size: 16),
-              label: const Text('Mark Paid', style: TextStyle(fontSize: 12)),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
-            if (f.status == 'paid' && f.paidDate.isNotEmpty)
-              Text('Paid: ${f.paidDate}',
-                style: const TextStyle(fontSize: 11, color: Colors.grey)),
-          ]),
-        ]),
-      ),
-    );
-
-  void _addFeeDialog(BuildContext context) {
-    final p = context.read<TransportProvider>();
-    final _nameCtrl = TextEditingController();
-    final _amountCtrl = TextEditingController();
-    final _monthCtrl = TextEditingController(
-      text: '${DateTime.now().month}/${DateTime.now().year}');
-    int? _studentId;
-    int? _vehicleId;
-    int? _routeId;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setS) => AlertDialog(
-          title: const Text('Add Transport Fee'),
-          content: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
-            DropdownButtonFormField<int>(
-              hint: const Text('Select Student'),
-              items: p.students.map((s) => DropdownMenuItem<int>(
-                value: s.studentId,
-                child: Text(s.studentName))).toList(),
-              onChanged: (v) {
-                setS(() {
-                  _studentId = v;
-                  final student = p.students.firstWhere((s) => s.studentId == v);
-                  _nameCtrl.text = student.studentName;
-                  _vehicleId = student.vehicleId;
-                  _routeId = student.routeId;
-                  _amountCtrl.text = student.monthlyFee.toStringAsFixed(0);
-                });
-              },
+        // Class filter
+        if (classes.isNotEmpty)
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            child: SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _classBadge('All Classes', null),
+                  ...classes.map((c) => _classBadge(c, c)),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            TextField(controller: _amountCtrl, keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Amount (Rs)')),
-            const SizedBox(height: 8),
-            TextField(controller: _monthCtrl,
-              decoration: const InputDecoration(labelText: 'Month (MM/YYYY)')),
-          ])),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-            ElevatedButton(
-              onPressed: () async {
-                if (_studentId == null) return;
-                Navigator.pop(ctx);
-                final ok = await p.createFee({
-        'student_id': _studentId,
-        'student_name': _nameCtrl.text,
-        'vehicle_id': _vehicleId ?? 0,
-        'route_id': _routeId ?? 0,
-        'amount': double.tryParse(_amountCtrl.text) ?? 0,
-        'month': _monthCtrl.text,
-        'status': 'pending',
-                });
-                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(ok ? 'Fee added!' : 'Failed'),
-                    backgroundColor: ok ? Colors.green : Colors.red));
-              },
-              child: const Text('Add')),
-          ])));
+          ),
+        const SizedBox(height: 8),
+
+        Expanded(
+          child: tp.isLoading || sp.isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : transportStudents.isEmpty
+              ? Center(child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.directions_bus, size: 64, color: Colors.grey.shade300),
+                    const SizedBox(height: 12),
+                    const Text('No students assigned to transport',
+                      style: TextStyle(color: Colors.grey)),
+                    const SizedBox(height: 8),
+                    const Text('Assign transport to students from Students tab',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      textAlign: TextAlign.center),
+                  ]))
+              : RefreshIndicator(
+                  onRefresh: () async {
+                    await context.read<TransportProvider>().fetchFees();
+                    await context.read<StudentProvider>().fetchStudents();
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(14),
+                    itemCount: filtered.length,
+                    itemBuilder: (ctx, i) {
+                      final student = filtered[i];
+                      // Find fees for this student
+                      final studentFees = fees.where((f) => f.studentId == student.id).toList();
+                      final paid = studentFees.where((f) => f.status == 'paid').fold(0.0, (s, f) => s + f.amount);
+                      final pendingAmt = studentFees.where((f) => f.status != 'paid').fold(0.0, (s, f) => s + f.amount);
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(children: [
+                            // Avatar
+                            CircleAvatar(
+                              backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                              child: Text(
+                                student.name.isNotEmpty ? student.name[0].toUpperCase() : '?',
+                                style: const TextStyle(color: AppTheme.primaryColor,
+                                  fontWeight: FontWeight.bold))),
+                            const SizedBox(width: 12),
+                            // Info
+                            Expanded(child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(student.name,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text('${student.className}-${student.section} • Roll: ${student.rollNo}',
+                                  style: const TextStyle(color: Colors.grey, fontSize: 11)),
+                                if (student.busRoute.isNotEmpty)
+                                  Text('Route: ${student.busRoute}',
+                                    style: const TextStyle(color: Colors.blue, fontSize: 11)),
+                                const SizedBox(height: 6),
+                                Row(children: [
+                                  _feeBadge('Paid: Rs ${paid.toStringAsFixed(0)}', Colors.green),
+                                  const SizedBox(width: 8),
+                                  if (pendingAmt > 0)
+                                    _feeBadge('Due: Rs ${pendingAmt.toStringAsFixed(0)}', Colors.orange),
+                                ]),
+                              ])),
+                            // Status
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: (pendingAmt == 0 && studentFees.isNotEmpty)
+                                      ? Colors.green.withOpacity(0.1)
+                                      : Colors.orange.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8)),
+                                  child: Text(
+                                    (pendingAmt == 0 && studentFees.isNotEmpty) ? 'PAID' : 'PENDING',
+                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold,
+                                      color: (pendingAmt == 0 && studentFees.isNotEmpty)
+                                        ? Colors.green : Colors.orange))),
+                                const SizedBox(height: 4),
+                                Text('${studentFees.length} record${studentFees.length != 1 ? 's' : ''}',
+                                  style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                              ]),
+                          ]),
+                        ),
+                      );
+                    },
+                  ),
+                )),
+      ]),
+    );
   }
 
-  Widget _stat(String label, String value, Color color) => Column(children: [
-    Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
-    Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+  Widget _classBadge(String label, String? cls) => GestureDetector(
+    onTap: () => setState(() => _selectedClass = cls),
+    child: Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      decoration: BoxDecoration(
+        color: _selectedClass == cls ? AppTheme.primaryColor : Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(20)),
+      child: Text(label,
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600,
+          color: _selectedClass == cls ? Colors.white : Colors.grey.shade700))));
+
+  Widget _stat(String label, String val, Color color) => Column(children: [
+    Text(val, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+    Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
   ]);
+
+  Widget _feeBadge(String text, Color color) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+    decoration: BoxDecoration(
+      color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+    child: Text(text, style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w600)));
 }
-
-

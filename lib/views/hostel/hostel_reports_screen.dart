@@ -56,10 +56,10 @@ class HostelReportsScreen extends StatelessWidget {
                     child: Icon(r['icon'] as IconData, color: color)),
                   title: Text(r['title'] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
                   subtitle: Text(r['sub'] as String, style: const TextStyle(fontSize: 11)),
-                  trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                    IconButton(icon: Icon(Icons.visibility, color: color, size: 20), onPressed: () {}),
-                    IconButton(icon: const Icon(Icons.download, color: Colors.grey, size: 20), onPressed: () {}),
-                  ]),
+                  trailing: IconButton(
+                    icon: Icon(Icons.visibility, color: color, size: 22),
+                    onPressed: () => _showDetail(context, r['title'] as String,
+                      r['sub'] as String, color)),
                 ),
               );
             },
@@ -69,9 +69,79 @@ class HostelReportsScreen extends StatelessWidget {
     );
   }
 
+  void _showDetail(BuildContext ctx, String title, String sub, Color color) {
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (_, sc) => Column(children: [
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            width: 40, height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(children: [
+              Container(width: 40, height: 40,
+                decoration: BoxDecoration(color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10)),
+                child: Icon(Icons.assessment, color: color)),
+              const SizedBox(width: 12),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(sub, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              ])),
+            ])),
+          const Divider(height: 1),
+          Expanded(child: ListView(
+            controller: sc,
+            padding: const EdgeInsets.all(16),
+            children: [
+              _detailCard('Summary', [
+                ['Total Records', '24'],
+                ['This Month', '18'],
+                ['Last Month', '22'],
+                ['Pending Actions', '3'],
+              ], color),
+              const SizedBox(height: 12),
+              _detailCard('Details', [
+                ['Generated Date', 'July 2025'],
+                ['Period', 'June 2025'],
+                ['Status', 'Active'],
+                ['Last Updated', 'Today'],
+              ], color),
+            ],
+          )),
+        ]),
+      ));
+  }
+
+  Widget _detailCard(String heading, List<List<String>> rows, Color color) =>
+    Card(child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(heading, style: TextStyle(fontWeight: FontWeight.bold,
+          fontSize: 13, color: color)),
+        const Divider(height: 16),
+        ...rows.map((r) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(r[0], style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(r[1], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+            ]))),
+      ])));
+
   Widget _qs(String label, String val, Color color) => Column(children: [
     Text(val, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: color)),
     Text(label, style: const TextStyle(fontSize: 9, color: Colors.grey), textAlign: TextAlign.center),
   ]);
 }
-

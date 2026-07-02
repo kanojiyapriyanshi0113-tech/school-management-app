@@ -61,7 +61,11 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen>
       final color = h['status'] == 'completed' ? Colors.green : Colors.blue;
       return Card(
         margin: const EdgeInsets.only(bottom: 10),
-        child: Padding(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => context.push('/teacher/homework/submissions',
+            extra: {'title': h['title'], 'class': h['class'], 'due': h['due']}),
+          child: Padding(
           padding: const EdgeInsets.all(14),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
@@ -87,8 +91,14 @@ class _TeacherHomeworkScreenState extends State<TeacherHomeworkScreen>
             ClipRRect(borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(value: pct, color: color,
                 backgroundColor: color.withOpacity(0.1), minHeight: 8)),
+            const SizedBox(height: 8),
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              Text('Tap to mark submissions', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+            ]),
           ]),
-        ),
+        )),
       );
     },
   );

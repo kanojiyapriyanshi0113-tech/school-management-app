@@ -55,6 +55,8 @@ import '../views/teacher/teacher_dashboard.dart';
 import '../views/teacher/teacher_attendance_screen.dart';
 import '../views/teacher/teacher_homework_screen.dart';
 import '../views/teacher/teacher_marks_screen.dart';
+import '../views/teacher/homework_submission_screen.dart';
+import '../views/exam/result_class_select_screen.dart';
 import '../views/settings/settings_screen.dart';
 
 class AppRouter {
@@ -170,7 +172,21 @@ class AppRouter {
       GoRoute(path: '/exams/list',    builder: (c, s) => const ExamListScreen()),
       GoRoute(path: '/exams/create',  builder: (c, s) => const CreateExamScreen()),
       GoRoute(path: '/exams/marks',   builder: (c, s) => const MarksEntryScreen()),
-      GoRoute(path: '/exams/results', builder: (c, s) => const ResultScreen()),
+      GoRoute(path: '/exams/results', builder: (c, s) {
+        final role = c.read<AuthProvider>().user?.role;
+        // Admin/staff pick a class then a student; students/parents see the class result directly.
+        return (role == 'admin' || role == 'staff')
+          ? const ResultClassSelectScreen()
+          : const ResultScreen();
+      }),
+      GoRoute(path: '/exams/results/student', builder: (c, s) {
+        final extra = s.extra as Map? ?? {};
+        return ResultScreen(
+          studentName: extra['name'] as String?,
+          studentRoll: extra['roll'] as String?,
+          className: extra['className'] as String?,
+        );
+      }),
       // ??????????
 
       // Notices
@@ -227,6 +243,14 @@ class AppRouter {
       GoRoute(path: '/teacher/dashboard',  builder: (c, s) => const TeacherDashboard()),
       GoRoute(path: '/teacher/attendance', builder: (c, s) => const TeacherAttendanceScreen()),
       GoRoute(path: '/teacher/homework',   builder: (c, s) => const TeacherHomeworkScreen()),
+      GoRoute(path: '/teacher/homework/submissions', builder: (c, s) {
+        final extra = s.extra as Map? ?? {};
+        return HomeworkSubmissionScreen(
+          title: extra['title'] as String? ?? '',
+          className: extra['class'] as String? ?? '',
+          due: extra['due'] as String? ?? '',
+        );
+      }),
       GoRoute(path: '/teacher/marks',      builder: (c, s) => const TeacherMarksScreen()),
     ],
   );

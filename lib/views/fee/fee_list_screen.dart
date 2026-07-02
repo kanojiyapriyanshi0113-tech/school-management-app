@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -6,6 +6,7 @@ import '../../providers/fee_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/language_provider.dart';
+import '../../providers/student_provider.dart';
 
 class FeeListScreen extends StatefulWidget {
   const FeeListScreen({super.key});
@@ -23,8 +24,10 @@ class _FeeListScreenState extends State<FeeListScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-      context.read<FeeProvider>().fetchFees());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<FeeProvider>().fetchFees();
+      context.read<StudentProvider>().fetchStudents();
+    });
   }
 
   @override
@@ -313,7 +316,3 @@ class _FeeListScreenState extends State<FeeListScreen> {
     Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
   ]);
 }
-
-
-
-
