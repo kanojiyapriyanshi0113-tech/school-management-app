@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
 class MarksEntryScreen extends StatefulWidget {
-  const MarksEntryScreen({super.key});
+  final int examId;
+  const MarksEntryScreen({super.key, this.examId = 0});
   @override
   State<MarksEntryScreen> createState() => _MarksEntryScreenState();
 }
@@ -94,11 +95,3 @@ class _MarksEntryScreenState extends State<MarksEntryScreen> {
     );
   }
 }
-
-
-
-
-
-
-
-
